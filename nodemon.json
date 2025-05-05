@@ -1,0 +1,17 @@
+{
+  "verbose": true,
+  "ignore": [
+    "node_modules/*",
+    ".git/*",
+    "*.test.js",
+    "*.md"
+  ],
+  "watch": [
+    "src/"
+  ],
+  "ext": "js,json",
+  "delay": "500",
+  "env": {
+    "NODE_ENV": "development"
+  }
+} 
