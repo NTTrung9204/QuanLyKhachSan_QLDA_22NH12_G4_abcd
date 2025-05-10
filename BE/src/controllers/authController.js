@@ -14,7 +14,7 @@ exports.signup = catchAsync(async (req, res, next) => {
  * User login
  */
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
-  const { user, token } = await authService.loginUser(email, password);
+  const { username, password } = req.body;
+  const { user, token } = await authService.loginUser(username, password);
   ResponseHandler.sendWithToken(res, 200, token, user);
 }); 
