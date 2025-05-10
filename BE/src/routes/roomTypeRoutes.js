@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/', roomTypeController.getAllRoomTypes);
 router.get('/:id', roomTypeController.getRoomType);
 router.get('/:id/images', roomTypeController.getRoomTypeImages);
+router.get('/:id/rooms', roomTypeController.getRoomTypeRooms);
 
 // Protected routes - only staff and admin
 router.use(authMiddleware.protect);

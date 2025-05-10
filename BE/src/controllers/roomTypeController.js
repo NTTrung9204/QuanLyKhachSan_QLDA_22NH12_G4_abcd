@@ -1,5 +1,6 @@
 const RoomType = require('../models/roomTypeModel');
 const Image = require('../models/imageModel');
+const Room = require('../models/roomModel');
 const { catchAsync } = require('../utils/errorHandler');
 const { AppError } = require('../utils/errorHandler');
 const ResponseHandler = require('../utils/responseHandler');
@@ -47,6 +48,21 @@ exports.getRoomTypeImages = catchAsync(async (req, res, next) => {
   });
 
   ResponseHandler.success(res, 200, images, 'Room type images retrieved successfully');
+});
+
+/**
+ * Get all rooms of a specific room type
+ */
+exports.getRoomTypeRooms = catchAsync(async (req, res, next) => {
+  const roomType = await RoomType.findById(req.params.id);
+
+  if (!roomType) {
+    return next(new AppError('No room type found with that ID', 404));
+  }
+
+  const rooms = await Room.find({ roomTypeId: req.params.id });
+  
+  ResponseHandler.success(res, 200, rooms, 'Rooms of this type retrieved successfully');
 });
 
 /**
