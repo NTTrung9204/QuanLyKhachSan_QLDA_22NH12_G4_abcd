@@ -22,6 +22,9 @@ const app = express();
 app.use(express.json()); // Body parser for JSON data
 app.use(morgan('dev')); // Logging middleware
 
+// Serve static files from public directory
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
 // Mount all routes under /api
 app.use('/api', routes);
 
