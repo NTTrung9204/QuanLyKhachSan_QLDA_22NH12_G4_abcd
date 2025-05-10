@@ -31,6 +31,19 @@ class ResponseHandler {
   }
 
   /**
+   * Send standard response with data
+   * @param {Object} res - Express response object
+   * @param {Number} statusCode - HTTP status code
+   * @param {Object|Array} data - Response data
+   */
+  static send(res, statusCode = 200, data) {
+    return res.status(statusCode).json({
+      status: 'success',
+      data
+    });
+  }
+
+  /**
    * Send response with token
    * @param {Object} res - Express response object
    * @param {Number} statusCode - HTTP status code

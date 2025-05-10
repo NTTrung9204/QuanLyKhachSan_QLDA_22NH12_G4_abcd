@@ -24,16 +24,35 @@ exports.protect = catchAsync(async (req, res, next) => {
   // 3) Verify token
   const decoded = jwtUtils.verifyToken(token);
 
-  // 4) Check if user still exists
+  // 4) Check if user still exists and is active
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
     return next(new AppError('The user belonging to this token no longer exists.', 401));
   }
+  
+  // 5) Check if user is active
+  if (currentUser.profile.state !== 'active') {
+    return next(new AppError('This user account has been blocked. Please contact support.', 403));
+  }
 
-  // 5) Grant access to protected route
+  // 6) Grant access to protected route
   req.user = currentUser;
   next();
 });
+
+/**
+ * Restrict access to certain roles
+ * @param  {...string} roles - Allowed roles
+ */
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    // Check if user role is allowed
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError('You do not have permission to perform this action', 403));
+    }
+    next();
+  };
+};
 
 /**
  * Optional authentication - verifies user if token exists, but doesn't block access
@@ -58,9 +77,9 @@ exports.optionalAuth = catchAsync(async (req, res, next) => {
     // 3) Verify token
     const decoded = jwtUtils.verifyToken(token);
 
-    // 4) Check if user still exists
+    // 4) Check if user still exists and is active
     const currentUser = await User.findById(decoded.id);
-    if (currentUser) {
+    if (currentUser && currentUser.profile.state === 'active') {
       // Attach user to request object
       req.user = currentUser;
     }

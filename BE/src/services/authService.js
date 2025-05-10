@@ -8,57 +8,64 @@ const jwtUtils = require('../utils/jwtUtils');
  * @returns {Object} User and token
  */
 exports.registerUser = async (userData) => {
-  const { firstName, lastName, email, phoneNumber, password } = userData;
+  const { username, password, fullName, phone, address, cccd, birthDate, gender } = userData;
   
-  // Check if email already exists
-  const existingUser = await User.findOne({ email });
+  // Check if username already exists
+  const existingUser = await User.findOne({ username });
   if (existingUser) {
-    throw new AppError('Email already in use', 400);
+    throw new AppError('Username already in use', 400);
   }
 
   // Create new user
   const newUser = await User.create({
-    firstName,
-    lastName,
-    email,
-    phoneNumber,
-    password
+    username,
+    passwordHash: password, // Will be hashed by pre-save hook
+    role: 'customer', // Default role
+    profile: {
+      fullName,
+      phone,
+      address,
+      cccd,
+      birthDate,
+      gender,
+      state: 'active'
+    }
   });
 
   // Generate token
   const token = jwtUtils.signToken(newUser._id);
 
-  // Remove password from output
-  newUser.password = undefined;
+  // Remove passwordHash from output
+  newUser.passwordHash = undefined;
 
   return { user: newUser, token };
 };
 
 /**
  * Authenticate user
- * @param {string} email - User email
+ * @param {string} username - Username
  * @param {string} password - User password
  * @returns {Object} User and token
  */
-exports.loginUser = async (email, password) => {
-  // Check if email and password exist
-  if (!email || !password) {
-    throw new AppError('Please provide email and password', 400);
+exports.loginUser = async (username, password) => {
+  // Check if username and password exist
+  if (!username || !password) {
+    throw new AppError('Please provide username and password', 400);
   }
 
-  // Find user by email
-  const user = await User.findOne({ email }).select('+password');
+  // Find user by username
+  const user = await User.findOne({ username, 'profile.state': 'active' }).select('+passwordHash');
   
   // Check if user exists and password is correct
-  if (!user || !(await user.correctPassword(password, user.password))) {
-    throw new AppError('Incorrect email or password', 401);
+  if (!user || !(await user.correctPassword(password))) {
+    throw new AppError('Incorrect username or password', 401);
   }
 
   // Generate token
   const token = jwtUtils.signToken(user._id);
 
-  // Remove password from output
-  user.password = undefined;
+  // Remove passwordHash from output
+  user.passwordHash = undefined;
 
   return { user, token };
 }; 
