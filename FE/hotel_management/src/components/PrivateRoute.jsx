@@ -22,8 +22,9 @@ const PrivateRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
+
   // Kiểm tra role nếu có yêu cầu
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user.data.user.role)) {
     // Nếu user không có quyền truy cập, chuyển về trang chủ
     return <Navigate to="/" replace />;
   }

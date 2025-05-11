@@ -44,9 +44,10 @@ const LoginPage = () => {
       login(userData);
       setSuccess('Đăng nhập thành công! Đang chuyển hướng...');
       
-    //   Chuyển hướng dựa theo role
+      // Chuyển hướng dựa theo role
       setTimeout(() => {
-        switch(userData.data.user.role) {
+        const userRole = userData.data.user.role;
+        switch(userRole) {
           case 'admin':
             navigate('/admin');
             break;
@@ -54,8 +55,10 @@ const LoginPage = () => {
             navigate('/staff/bookings');
             break;
           case 'customer':
-            navigate('/');
+            navigate('/customer');
             break;
+          default:
+            navigate('/');
         }
       }, 1500);
 

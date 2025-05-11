@@ -42,7 +42,7 @@ const AppRoutes = () => {
             <Route 
                 path="/staff/*" 
                 element={
-                    <PrivateRoute allowedRoles={['staff', 'admin']}>
+                    <PrivateRoute allowedRoles={['staff']}>
                         <Routes>
                             <Route path="/" element={<div>Staff Dashboard</div>} />
                             <Route path="bookings" element={<div>Booking Management</div>} />
@@ -51,13 +51,13 @@ const AppRoutes = () => {
                 } 
             />
 
-            {/* User Routes */}
+            {/* Customer Routes */}
             <Route 
-                path="/dashboard/*" 
+                path="/customer/*" 
                 element={
-                    <PrivateRoute allowedRoles={['user']}>
+                    <PrivateRoute allowedRoles={['customer']}>
                         <Routes>
-                            <Route path="/" element={<div>User Dashboard</div>} />
+                            <Route path="/" element={<div>Customer Dashboard</div>} />
                             <Route path="bookings" element={<div>My Bookings</div>} />
                             <Route path="profile" element={<div>My Profile</div>} />
                         </Routes>
