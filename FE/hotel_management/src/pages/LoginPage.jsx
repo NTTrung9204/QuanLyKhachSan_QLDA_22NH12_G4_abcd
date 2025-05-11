@@ -33,11 +33,16 @@ const LoginPage = () => {
     try {
       const response = await api.post('/api/auth/login', formData);
       login(response.data);
-      console.log('Login successful:', response.data);
+      
+      // Lưu token vào localStorage
+      localStorage.setItem('token', response.data.token);
+      
       setSuccess('Đăng nhập thành công! Đang chuyển hướng...');
+      
       setTimeout(() => {
         navigate('/');
       }, 1500);
+
     } catch (error) {
       setError('Đăng nhập thất bại. Vui lòng kiểm tra lại tên đăng nhập và mật khẩu.');
       setLoading(false);
