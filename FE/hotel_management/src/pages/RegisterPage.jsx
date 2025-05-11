@@ -102,7 +102,7 @@ const RegisterPage = () => {
         
         setTimeout(() => {
           login(newUser);
-          navigate('/');
+          navigate('/login');
         }, 1500);
         
         setLoading(false);

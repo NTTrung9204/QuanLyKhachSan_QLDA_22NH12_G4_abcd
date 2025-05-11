@@ -1,40 +1,74 @@
 import React from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import PrivateRoute from '../components/PrivateRoute';
 
 // Import pages
 import LoginPage from '../pages/LoginPage';
 import HomePage from '../pages/HomePage';
 import RegisterPage from '../pages/RegisterPage';
 
-// Protected route wrapper component
-const ProtectedRoute = ({ allowedRoles = [] }) => {
-  const { currentUser, isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    // Redirect to login if not authenticated
-    return <Navigate to="/login" replace />;
-  }
-  
-  // Check role-based access if roles are specified
-  if (allowedRoles.length > 0 && !allowedRoles.includes(currentUser.role)) {
-    // Redirect to home if user doesn't have the required role
-    return <Navigate to="/" replace />;
-  }
-  
-  // Render the child routes
-  return <Outlet />;
-};
-
 const AppRoutes = () => {
-  return (
-    <Routes style={{ width: '100vw', height: '100vh' }}>
-      {/* Public Routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<HomePage />} /> 
-      <Route path="/register" element={<RegisterPage />} />
-    </Routes>
-  );
+    return (
+        <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Protected Routes */}
+            <Route 
+                path="/" 
+                element={
+                    <PrivateRoute>
+                        <HomePage />
+                    </PrivateRoute>
+                } 
+            />
+
+            {/* Admin Routes */}
+            <Route 
+                path="/admin/*" 
+                element={
+                    <PrivateRoute allowedRoles={['admin']}>
+                        <Routes>
+                            <Route path="/" element={<div>Admin Dashboard</div>} />
+                            <Route path="rooms" element={<div>Room Management</div>} />
+                            <Route path="bookings" element={<div>Booking Management</div>} />
+                        </Routes>
+                    </PrivateRoute>
+                } 
+            />
+
+            {/* Staff Routes */}
+            <Route 
+                path="/staff/*" 
+                element={
+                    <PrivateRoute allowedRoles={['staff', 'admin']}>
+                        <Routes>
+                            <Route path="/" element={<div>Staff Dashboard</div>} />
+                            <Route path="bookings" element={<div>Booking Management</div>} />
+                        </Routes>
+                    </PrivateRoute>
+                } 
+            />
+
+            {/* User Routes */}
+            <Route 
+                path="/dashboard/*" 
+                element={
+                    <PrivateRoute allowedRoles={['user']}>
+                        <Routes>
+                            <Route path="/" element={<div>User Dashboard</div>} />
+                            <Route path="bookings" element={<div>My Bookings</div>} />
+                            <Route path="profile" element={<div>My Profile</div>} />
+                        </Routes>
+                    </PrivateRoute>
+                } 
+            />
+
+            {/* Catch all - redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    );
 };
 
 export default AppRoutes;
