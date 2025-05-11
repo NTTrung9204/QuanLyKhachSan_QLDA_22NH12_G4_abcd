@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 // Import pages
 import LoginPage from '../pages/LoginPage';
 import HomePage from '../pages/HomePage';
+import RegisterPage from '../pages/RegisterPage';
 
 // Protected route wrapper component
 const ProtectedRoute = ({ allowedRoles = [] }) => {
@@ -27,10 +28,11 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
 
 const AppRoutes = () => {
   return (
-    <Routes>
+    <Routes style={{ width: '100vw', height: '100vh' }}>
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<HomePage />} /> 
+      <Route path="/register" element={<RegisterPage />} />
     </Routes>
   );
 };
