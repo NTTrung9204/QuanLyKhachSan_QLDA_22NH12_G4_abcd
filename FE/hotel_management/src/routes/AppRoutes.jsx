@@ -6,6 +6,7 @@ import PrivateRoute from '../components/PrivateRoute';
 import LoginPage from '../pages/LoginPage';
 import HomePage from '../pages/HomePage';
 import RegisterPage from '../pages/RegisterPage';
+import ImageManagePage from '../pages/admin/ImageManagePage';
 
 const AppRoutes = () => {
     return (
@@ -25,14 +26,15 @@ const AppRoutes = () => {
             />
 
             {/* Admin Routes */}
-            <Route 
+            <Route
                 path="/admin/*" 
                 element={
                     <PrivateRoute allowedRoles={['admin']}>
-                        <Routes>
+                        <Routes style={{backgroundColor : '#f8fafc', width : '100%'}}>
                             <Route path="/" element={<div>Admin Dashboard</div>} />
                             <Route path="rooms" element={<div>Room Management</div>} />
-                            <Route path="bookings" element={<div>Booking Management</div>} />
+                            <Route path="services" element={<div>Service Management</div>} />
+                            <Route path="images" element={<ImageManagePage />} />
                         </Routes>
                     </PrivateRoute>
                 } 
