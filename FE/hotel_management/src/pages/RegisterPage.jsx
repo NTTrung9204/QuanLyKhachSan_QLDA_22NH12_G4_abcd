@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import axios from '../api/axios';
+import api from '../api/axios';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -79,19 +81,23 @@ const RegisterPage = () => {
     
     try {
       // Here you would normally call your API to register the user
+
+      const newUser = {
+        username: formData.username,
+        password: formData.password,
+        fullName: formData.fullName,
+        phone: formData.phone,
+        address: formData.address,
+        cccd: formData.cccd,
+        birthDate: formData.birthDate,
+        gender: formData.gender,
+      };
+
+      console.log('New user data:', newUser);
+
+      await api.post('/api/auth/signup', newUser);
+
       setTimeout(() => {
-        const newUser = {
-          id: Math.random().toString(36).substr(2, 9),
-          username: formData.username,
-          name: formData.fullName,
-          phone: formData.phone,
-          address: formData.address,
-          cccd: formData.cccd,
-          birthDate: formData.birthDate,
-          gender: formData.gender,
-          role: 'user'
-        };
-        
         setSuccess('Đăng ký thành công! Đang chuyển hướng...');
         
         setTimeout(() => {
