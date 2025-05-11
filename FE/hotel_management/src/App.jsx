@@ -8,11 +8,9 @@ import AppRoutes from './routes/AppRoutes'
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <AppRoutes />
-        </div>
+    <AuthProvider style={{ width: '100vw', height: '100vh' }}>
+      <Router style={{ width: '100vw', height: '100vh' }}>
+        <AppRoutes />
       </Router>
     </AuthProvider>
   )
