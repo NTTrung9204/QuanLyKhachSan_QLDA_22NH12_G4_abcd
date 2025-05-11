@@ -13,7 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Danh sách các đường dẫn không cần token
-    const excludedPaths = ['/register', '/login', '/signup', '/api/auth/signup'];
+    const excludedPaths = ['/api/auth/login', '/api/auth/signup'];
 
     // Nếu không nằm trong danh sách, thêm token
     if (!excludedPaths.some(path => config.url.includes(path))) {
