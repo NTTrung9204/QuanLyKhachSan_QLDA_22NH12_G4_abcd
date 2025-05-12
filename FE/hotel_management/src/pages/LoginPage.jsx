@@ -32,15 +32,34 @@ const LoginPage = () => {
     
     try {
       const response = await api.post('/api/auth/login', formData);
-      login(response.data);
+      const userData = response.data;
+
+    //   console.log('token:', userData.token);
+    //   console.log('Login successful:', userData.data.user.role);   
       
-      // Lưu token vào localStorage
-      localStorage.setItem('token', response.data.token);
+      // Lưu token và thông tin user vào localStorage
+      localStorage.setItem('token', userData.token);
+      localStorage.setItem('user', JSON.stringify(userData.data.user));
       
+      login(userData);
       setSuccess('Đăng nhập thành công! Đang chuyển hướng...');
       
+      // Chuyển hướng dựa theo role
       setTimeout(() => {
-        navigate('/');
+        const userRole = userData.data.user.role;
+        switch(userRole) {
+          case 'admin':
+            navigate('/admin');
+            break;
+          case 'staff':
+            navigate('/staff/bookings');
+            break;
+          case 'customer':
+            navigate('/customer');
+            break;
+          default:
+            navigate('/');
+        }
       }, 1500);
 
     } catch (error) {

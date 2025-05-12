@@ -15,11 +15,16 @@ export const AuthProvider = ({ children }) => {
 
     // Load user data from localStorage on initial render
     useEffect(() => {
-        const userData = localStorage.getItem('user');
-        if (userData) {
-            setCurrentUser(JSON.parse(userData));
+        try {
+            const userData = localStorage.getItem('user');
+            if (userData && userData !== 'undefined') {
+                setCurrentUser(JSON.parse(userData));
+            }
+        } catch (err) {
+            console.error('Lỗi parse userData:', err);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }, []);
 
     // Login function

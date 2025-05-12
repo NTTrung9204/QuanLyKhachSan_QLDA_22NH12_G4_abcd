@@ -21,8 +21,8 @@ const app = express();
 
 // Cấu hình CORS
 app.use(cors({
-  origin: 'http://localhost:5173', // frontend React
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin: 'http://localhost:5172', // frontend React
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
