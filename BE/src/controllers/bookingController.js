@@ -1,0 +1,75 @@
+const bookingService = require('../services/bookingService');
+const { catchAsync } = require('../utils/errorHandler');
+const ResponseHandler = require('../utils/responseHandler');
+
+/**
+ * Get all bookings
+ * Admin/staff can see all bookings, customers can only see their own bookings
+ */
+exports.getAllBookings = catchAsync(async (req, res, next) => {
+  const bookings = await bookingService.getAllBookings(req.user);
+  ResponseHandler.success(res, 200, bookings, 'Bookings retrieved successfully');
+});
+
+/**
+ * Get a single booking
+ * Admin/staff can see any booking, customers can only see their own bookings
+ */
+exports.getBooking = catchAsync(async (req, res, next) => {
+  const booking = await bookingService.getBooking(req.params.id, req.user);
+  ResponseHandler.success(res, 200, booking, 'Booking retrieved successfully');
+});
+
+/**
+ * Create a new booking
+ * Customers can create their own bookings, staff/admin can create bookings for any customer
+ */
+exports.createBooking = catchAsync(async (req, res, next) => {
+  const booking = await bookingService.createBooking(req.body, req.user);
+  ResponseHandler.success(res, 201, booking, 'Booking created successfully');
+});
+
+/**
+ * Update a booking
+ * Admin/staff can update any booking, customers can only update their own pending bookings
+ */
+exports.updateBooking = catchAsync(async (req, res, next) => {
+  const booking = await bookingService.updateBooking(req.params.id, req.body, req.user);
+  ResponseHandler.success(res, 200, booking, 'Booking updated successfully');
+});
+
+/**
+ * Delete a booking
+ * Admin/staff can delete any booking, customers can only delete their own pending bookings
+ */
+exports.deleteBooking = catchAsync(async (req, res, next) => {
+  await bookingService.deleteBooking(req.params.id, req.user);
+  ResponseHandler.success(res, 200, null, 'Booking deleted successfully');
+});
+
+/**
+ * Change booking status to checked_in
+ * Only staff/admin can change status
+ */
+exports.checkIn = catchAsync(async (req, res, next) => {
+  const booking = await bookingService.checkIn(req.params.id, req.user);
+  ResponseHandler.success(res, 200, booking, 'Booking checked in successfully');
+});
+
+/**
+ * Change booking status to checked_out
+ * Only staff/admin can change status
+ */
+exports.checkOut = catchAsync(async (req, res, next) => {
+  const booking = await bookingService.checkOut(req.params.id, req.user);
+  ResponseHandler.success(res, 200, booking, 'Booking checked out successfully');
+});
+
+/**
+ * Change booking status to cancelled
+ * Staff/admin can cancel any booking, customers can only cancel their own pending bookings
+ */
+exports.cancelBooking = catchAsync(async (req, res, next) => {
+  const booking = await bookingService.cancelBooking(req.params.id, req.user);
+  ResponseHandler.success(res, 200, booking, 'Booking cancelled successfully');
+}); 

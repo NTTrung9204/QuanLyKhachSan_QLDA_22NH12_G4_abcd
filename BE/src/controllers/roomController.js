@@ -3,25 +3,13 @@ const RoomType = require('../models/roomTypeModel');
 const { catchAsync } = require('../utils/errorHandler');
 const { AppError } = require('../utils/errorHandler');
 const ResponseHandler = require('../utils/responseHandler');
+const roomService = require('../services/roomService');
 
 /**
  * Get all rooms
  */
 exports.getAllRooms = catchAsync(async (req, res, next) => {
-  // Build filter object
-  const filter = {};
-  
-  // Filter by room type if provided
-  if (req.query.roomType) {
-    filter.roomTypeId = req.query.roomType;
-  }
-  
-  // Filter by floor if provided
-  if (req.query.floor) {
-    filter.floor = req.query.floor;
-  }
-
-  const rooms = await Room.find(filter);
+  const rooms = await roomService.getAllRooms(req.query);
   ResponseHandler.success(res, 200, rooms, 'Rooms retrieved successfully');
 });
 
@@ -29,12 +17,7 @@ exports.getAllRooms = catchAsync(async (req, res, next) => {
  * Get a single room
  */
 exports.getRoom = catchAsync(async (req, res, next) => {
-  const room = await Room.findById(req.params.id);
-
-  if (!room) {
-    return next(new AppError('No room found with that ID', 404));
-  }
-
+  const room = await roomService.getRoomById(req.params.id);
   ResponseHandler.success(res, 200, room, 'Room retrieved successfully');
 });
 
@@ -103,4 +86,66 @@ exports.getRoomsByFloor = catchAsync(async (req, res, next) => {
 exports.getRoomsByType = catchAsync(async (req, res, next) => {
   const rooms = await Room.find({ roomTypeId: req.params.roomTypeId });
   ResponseHandler.success(res, 200, rooms, 'Rooms of specified type retrieved successfully');
+});
+
+/**
+ * Get available rooms for a specific date range
+ */
+exports.getAvailableRooms = catchAsync(async (req, res, next) => {
+  // Check if required query parameters are provided
+  const { checkIn, checkOut } = req.query;
+  
+  if (!checkIn || !checkOut) {
+    return next(new AppError('Please provide check-in and check-out dates', 400));
+  }
+  
+  // Get available rooms based on provided dates and optional roomTypeId
+  const availableRooms = await roomService.getAvailableRooms(
+    checkIn, 
+    checkOut, 
+    req.query.roomTypeId
+  );
+  
+  // Group available rooms by room type for easier client-side processing
+  const roomsByType = {};
+  
+  availableRooms.forEach(room => {
+    const roomTypeId = room.roomTypeId._id.toString();
+    
+    if (!roomsByType[roomTypeId]) {
+      // Initialize room type data
+      roomsByType[roomTypeId] = {
+        roomTypeId: roomTypeId,
+        name: room.roomTypeId.name,
+        pricePerNight: room.roomTypeId.pricePerNight,
+        maxAdult: room.roomTypeId.maxAdult,
+        maxChild: room.roomTypeId.maxChild,
+        description: room.roomTypeId.description,
+        amenities: room.roomTypeId.amenities,
+        availableRooms: []
+      };
+    }
+    
+    // Add room to the corresponding room type
+    roomsByType[roomTypeId].availableRooms.push({
+      _id: room._id,
+      name: room.name,
+      floor: room.floor
+    });
+  });
+  
+  // Convert the object to an array
+  const result = Object.values(roomsByType);
+  
+  ResponseHandler.success(
+    res, 
+    200, 
+    {
+      checkIn,
+      checkOut,
+      totalAvailableRooms: availableRooms.length,
+      roomTypes: result
+    }, 
+    'Available rooms retrieved successfully'
+  );
 }); 
