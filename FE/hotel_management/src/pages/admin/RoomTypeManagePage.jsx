@@ -483,10 +483,10 @@ const RoomTypeManagePage = () => {
       facilityIds: roomType.facilityIds.map(f => f._id),
       imageIds: roomType.imageIds
     });
-    setSelectedFacilities(facilities.filter(f => 
+    setSelectedFacilities(facilities.filter(f =>
       roomType.facilityIds.some(rf => rf._id === f._id)
     ));
-    setSelectedImages(images.filter(img => 
+    setSelectedImages(images.filter(img =>
       roomType.imageIds.includes(img._id)
     ));
     setIsModalVisible(true);
@@ -573,7 +573,7 @@ const RoomTypeManagePage = () => {
   const facilitiesSection = (
     <div style={styles.formGroup}>
       <label style={styles.label}>Thiết bị</label>
-      <button 
+      <button
         type="button"
         style={styles.selectButton}
         onClick={() => setShowFacilityModal(true)}
@@ -586,7 +586,7 @@ const RoomTypeManagePage = () => {
             <span>{facility.name}</span>
             <button
               type="button"
-              style={{...styles.removeButton, padding: '2px 4px'}}
+              style={{ ...styles.removeButton, padding: '2px 4px' }}
               onClick={() => handleFacilitySelect(facility)}
             >
               ✕
@@ -600,7 +600,7 @@ const RoomTypeManagePage = () => {
   const imagesSection = (
     <div style={styles.formGroup}>
       <label style={styles.label}>Hình ảnh</label>
-      <button 
+      <button
         type="button"
         style={styles.selectButton}
         onClick={() => setShowImageModal(true)}
@@ -610,15 +610,15 @@ const RoomTypeManagePage = () => {
       <div style={styles.selectedItemsContainer}>
         {selectedImages.map(image => (
           <div key={image._id} style={styles.selectedImageItem}>
-            <img 
-              src={image.path} 
-              alt={image.filename || 'Room image'} 
+            <img
+              src={image.path}
+              alt={image.filename || 'Room image'}
               style={styles.selectedImagePreview}
             />
             <span>{image.filename || image._id}</span>
             <button
               type="button"
-              style={{...styles.removeButton, padding: '2px 4px'}}
+              style={{ ...styles.removeButton, padding: '2px 4px' }}
               onClick={() => handleImageSelect(image)}
             >
               ✕
@@ -636,8 +636,8 @@ const RoomTypeManagePage = () => {
           <div style={styles.selectionModal}>
             <div style={styles.modalHeader}>
               <h3 style={styles.modalTitle}>Chọn thiết bị</h3>
-              <button 
-                style={{...styles.removeButton, padding: '8px'}}
+              <button
+                style={{ ...styles.removeButton, padding: '8px' }}
                 onClick={() => setShowFacilityModal(false)}
               >
                 ✕
@@ -666,8 +666,8 @@ const RoomTypeManagePage = () => {
           <div style={styles.selectionModal}>
             <div style={styles.modalHeader}>
               <h3 style={styles.modalTitle}>Chọn hình ảnh</h3>
-              <button 
-                style={{...styles.removeButton, padding: '8px'}}
+              <button
+                style={{ ...styles.removeButton, padding: '8px' }}
                 onClick={() => setShowImageModal(false)}
               >
                 ✕
@@ -683,9 +683,9 @@ const RoomTypeManagePage = () => {
                   }}
                   onClick={() => handleImageSelect(image)}
                 >
-                  <img 
-                    src={image.path} 
-                    alt={image.filename || 'Room image'} 
+                  <img
+                    src={image.path}
+                    alt={image.filename || 'Room image'}
                     style={styles.imagePreview}
                   />
                   <span>{image.filename || image._id}</span>
@@ -742,7 +742,7 @@ const RoomTypeManagePage = () => {
               <th style={styles.th}>Tiện nghi</th>
               <th style={styles.th}>Thiết bị</th>
               <th style={styles.th}>Hình ảnh</th>
-              <th style={{...styles.th, ...styles.actionColumn}}>Thao tác</th>
+              <th style={{ ...styles.th, ...styles.actionColumn }}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -765,15 +765,15 @@ const RoomTypeManagePage = () => {
                 </td>
                 <td style={styles.td}>
                   <ul style={styles.facilitiesList}>
-                  {facilities
-                        .filter(facility =>
+                    {facilities
+                      .filter(facility =>
                         roomType.facilityIds.some(f => f._id === facility._id)
-                        )
-                        .map(facility => (
+                      )
+                      .map(facility => (
                         <li key={facility._id} style={styles.facilityItem}>
-                            • {facility.name}
+                          • {facility.name}
                         </li>
-                    ))}
+                      ))}
                   </ul>
                 </td>
                 <td style={styles.td}>
@@ -788,10 +788,10 @@ const RoomTypeManagePage = () => {
                             style={styles.tableImage}
                           />
                         </li>
-                    ))}
+                      ))}
                   </ul>
                 </td>
-                <td style={{...styles.td, ...styles.actionColumn}}>
+                <td style={{ ...styles.td, ...styles.actionColumn }}>
                   <div style={styles.actionButtons}>
                     <button
                       style={styles.editButton}
@@ -818,8 +818,8 @@ const RoomTypeManagePage = () => {
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
               <h2 style={styles.modalTitle}>{modalTitle}</h2>
-              <button 
-                style={{...styles.removeButton, padding: '8px'}}
+              <button
+                style={{ ...styles.removeButton, padding: '8px' }}
                 onClick={() => {
                   setIsModalVisible(false);
                   setEditingId(null);
@@ -897,7 +897,7 @@ const RoomTypeManagePage = () => {
                   {formData.amenities.map((amenity, index) => (
                     <div key={index} style={styles.amenityRow}>
                       <input
-                        style={{...styles.input, flex: 1}}
+                        style={{ ...styles.input, flex: 1 }}
                         type="text"
                         value={amenity}
                         onChange={(e) => handleAmenityChange(index, e.target.value)}
@@ -926,8 +926,8 @@ const RoomTypeManagePage = () => {
               {imagesSection}
 
               <div style={styles.buttonGroup}>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   style={styles.cancelButton}
                   onClick={() => setIsModalVisible(false)}
                 >

@@ -9,6 +9,7 @@ import RegisterPage from '../pages/RegisterPage';
 import ImageManagePage from '../pages/admin/ImageManagePage';
 import FacilityManagePage from '../pages/admin/FacilityManagePage';
 import RoomTypeManagePage from '../pages/admin/RoomTypeManagePage';
+import RoomManagePage from '../pages/admin/RoomManagePage';
 
 const AppRoutes = () => {
     return (
@@ -34,7 +35,7 @@ const AppRoutes = () => {
                     <PrivateRoute allowedRoles={['admin']}>
                         <Routes style={{backgroundColor : '#f8fafc', width : '100%'}}>
                             <Route path="/" element={<div>Admin Dashboard</div>} />
-                            <Route path="rooms" element={<div>Room Management</div>} />
+                            <Route path="rooms" element={<RoomManagePage />} />
                             <Route path="services" element={<div>Service Management</div>} />
                             <Route path="images" element={<ImageManagePage />} />
                             <Route path="facilities" element={<FacilityManagePage />} />
