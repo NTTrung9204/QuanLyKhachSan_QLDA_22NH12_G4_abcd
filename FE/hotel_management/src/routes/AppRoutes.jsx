@@ -7,6 +7,7 @@ import LoginPage from '../pages/LoginPage';
 import HomePage from '../pages/HomePage';
 import RegisterPage from '../pages/RegisterPage';
 import ImageManagePage from '../pages/admin/ImageManagePage';
+import FacilityManagePage from '../pages/admin/FacilityManagePage';
 
 const AppRoutes = () => {
     return (
@@ -35,6 +36,7 @@ const AppRoutes = () => {
                             <Route path="rooms" element={<div>Room Management</div>} />
                             <Route path="services" element={<div>Service Management</div>} />
                             <Route path="images" element={<ImageManagePage />} />
+                            <Route path="facilities" element={<FacilityManagePage />} />
                         </Routes>
                     </PrivateRoute>
                 } 
