@@ -8,6 +8,7 @@ import HomePage from '../pages/HomePage';
 import RegisterPage from '../pages/RegisterPage';
 import ImageManagePage from '../pages/admin/ImageManagePage';
 import FacilityManagePage from '../pages/admin/FacilityManagePage';
+import RoomTypeManagePage from '../pages/admin/RoomTypeManagePage';
 
 const AppRoutes = () => {
     return (
@@ -37,6 +38,7 @@ const AppRoutes = () => {
                             <Route path="services" element={<div>Service Management</div>} />
                             <Route path="images" element={<ImageManagePage />} />
                             <Route path="facilities" element={<FacilityManagePage />} />
+                            <Route path="type-rooms" element={<RoomTypeManagePage />} />
                         </Routes>
                     </PrivateRoute>
                 } 
