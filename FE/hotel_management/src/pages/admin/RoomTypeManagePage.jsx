@@ -39,19 +39,21 @@ const styles = {
     width: '100%',
     height: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    margin: 'auto',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000
+    zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     padding: '2rem',
     borderRadius: '8px',
     width: '90%',
     maxWidth: '800px',
     maxHeight: '90vh',
-    overflowY: 'auto'
+    overflowY: 'auto',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
   },
   modalHeader: {
     display: 'flex',
@@ -264,6 +266,98 @@ const styles = {
     height: '30px',
     objectFit: 'cover',
     borderRadius: '4px'
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginTop: '1rem',
+    backgroundColor: 'white',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.5)'
+  },
+  th: {
+    textAlign: 'left',
+    padding: '12px',
+    borderBottom: '1px solid #e2e8f0',
+    color: '#1f2937',
+    backgroundColor: '#f8fafc',
+    minWidth: '150px'
+  },
+  td: {
+    padding: '12px',
+    borderBottom: '1px solid #e2e8f0',
+    textAlign: 'left',
+    verticalAlign: 'top',
+    color: '#000000'
+  },
+  amenitiesList: {
+    margin: 0,
+    padding: 0,
+    listStyle: 'none'
+  },
+  amenityItem: {
+    marginBottom: '4px',
+    color: '#000000'
+  },
+  tableContainer: {
+    backgroundColor: '#fff',
+    padding: '1.5rem',
+    borderRadius: '8px',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.5)'
+  },
+  facilitiesList: {
+    margin: 0,
+    padding: 0,
+    listStyle: 'none'
+  },
+  facilityItem: {
+    marginBottom: '4px',
+    color: '#000000',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  },
+  imagesList: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    margin: 0,
+    padding: 0,
+    listStyle: 'none'
+  },
+  tableImage: {
+    width: '60px',
+    height: '60px',
+    objectFit: 'cover',
+    borderRadius: '4px'
+  },
+  actionColumn: {
+    width: '80px',
+    textAlign: 'center'
+  },
+  deleteButton: {
+    backgroundColor: '#ef4444',
+    color: 'white',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '14px'
+  },
+  actionButtons: {
+    display: 'flex',
+    gap: '8px',
+    justifyContent: 'center'
+  },
+  editButton: {
+    backgroundColor: '#1890ff',
+    color: 'white',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '14px'
   }
 };
 
@@ -285,11 +379,29 @@ const RoomTypeManagePage = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [roomTypes, setRoomTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
+    fetchRoomTypes();
     fetchFacilities();
     fetchImages();
   }, []);
+
+  const fetchRoomTypes = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/api/room-types');
+      console.log(response.data.data);
+      setRoomTypes(response.data.data);
+    } catch (error) {
+      alert('Không thể tải danh sách loại phòng');
+      console.error('Error fetching room types:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchFacilities = async () => {
     try {
@@ -359,12 +471,39 @@ const RoomTypeManagePage = () => {
     }));
   };
 
+  const handleEdit = (roomType) => {
+    setEditingId(roomType._id);
+    setFormData({
+      name: roomType.name,
+      pricePerNight: roomType.pricePerNight,
+      maxAdult: roomType.maxAdult,
+      maxChild: roomType.maxChild,
+      description: roomType.description,
+      amenities: roomType.amenities,
+      facilityIds: roomType.facilityIds.map(f => f._id),
+      imageIds: roomType.imageIds
+    });
+    setSelectedFacilities(facilities.filter(f => 
+      roomType.facilityIds.some(rf => rf._id === f._id)
+    ));
+    setSelectedImages(images.filter(img => 
+      roomType.imageIds.includes(img._id)
+    ));
+    setIsModalVisible(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/room-types', formData);
-      alert('Thêm loại phòng thành công');
+      if (editingId) {
+        await api.patch(`/api/room-types/${editingId}`, formData);
+        alert('Cập nhật loại phòng thành công');
+      } else {
+        await api.post('/api/room-types', formData);
+        alert('Thêm loại phòng thành công');
+      }
       setIsModalVisible(false);
+      setEditingId(null);
       setFormData({
         name: "Phòng Deluxe",
         pricePerNight: 1200000,
@@ -375,9 +514,12 @@ const RoomTypeManagePage = () => {
         facilityIds: [],
         imageIds: []
       });
+      setSelectedFacilities([]);
+      setSelectedImages([]);
+      fetchRoomTypes();
     } catch (error) {
-      alert('Không thể thêm loại phòng');
-      console.error('Error adding room type:', error);
+      alert(editingId ? 'Không thể cập nhật loại phòng' : 'Không thể thêm loại phòng');
+      console.error('Error saving room type:', error);
     }
   };
 
@@ -412,6 +554,19 @@ const RoomTypeManagePage = () => {
         ...prev,
         imageIds: [...prev.imageIds, image._id]
       }));
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa loại phòng này?')) {
+      try {
+        await api.delete(`/api/room-types/${id}`);
+        alert('Xóa loại phòng thành công');
+        fetchRoomTypes();
+      } catch (error) {
+        alert('Không thể xóa loại phòng');
+        console.error('Error deleting room type:', error);
+      }
     }
   };
 
@@ -543,23 +698,132 @@ const RoomTypeManagePage = () => {
     </>
   );
 
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  };
+
+  const modalTitle = editingId ? "Cập nhật loại phòng" : "Thêm loại phòng mới";
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <h1 style={styles.title}>Quản lý loại phòng</h1>
-        <button style={styles.addButton} onClick={() => setIsModalVisible(true)}>
+        <button style={styles.addButton} onClick={() => {
+          setEditingId(null);
+          setFormData({
+            name: "Phòng Deluxe",
+            pricePerNight: 1200000,
+            maxAdult: 2,
+            maxChild: 1,
+            description: "Phòng sang trọng với tầm nhìn ra thành phố, diện tích 30m²",
+            amenities: ["Bữa sáng miễn phí", "Dịch vụ phòng 24/7", "Đồ dùng phòng tắm cao cấp"],
+            facilityIds: [],
+            imageIds: []
+          });
+          setSelectedFacilities([]);
+          setSelectedImages([]);
+          setIsModalVisible(true);
+        }}>
           Thêm loại phòng
         </button>
+      </div>
+
+      <div style={styles.tableContainer}>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.th}>Tên loại phòng</th>
+              <th style={styles.th}>Giá mỗi đêm</th>
+              <th style={styles.th}>Số người</th>
+              <th style={styles.th}>Mô tả</th>
+              <th style={styles.th}>Tiện nghi</th>
+              <th style={styles.th}>Thiết bị</th>
+              <th style={styles.th}>Hình ảnh</th>
+              <th style={{...styles.th, ...styles.actionColumn}}>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {roomTypes.map((roomType) => (
+              <tr key={roomType._id}>
+                <td style={styles.td}>{roomType.name}</td>
+                <td style={styles.td}>{formatPrice(roomType.pricePerNight)}</td>
+                <td style={styles.td}>
+                  {roomType.maxAdult} người lớn, {roomType.maxChild} trẻ em
+                </td>
+                <td style={styles.td}>{roomType.description}</td>
+                <td style={styles.td}>
+                  <ul style={styles.amenitiesList}>
+                    {roomType.amenities.map((amenity, index) => (
+                      <li key={index} style={styles.amenityItem}>
+                        • {amenity}
+                      </li>
+                    ))}
+                  </ul>
+                </td>
+                <td style={styles.td}>
+                  <ul style={styles.facilitiesList}>
+                  {facilities
+                        .filter(facility =>
+                        roomType.facilityIds.some(f => f._id === facility._id)
+                        )
+                        .map(facility => (
+                        <li key={facility._id} style={styles.facilityItem}>
+                            • {facility.name}
+                        </li>
+                    ))}
+                  </ul>
+                </td>
+                <td style={styles.td}>
+                  <ul style={styles.imagesList}>
+                    {images
+                      .filter(image => roomType.imageIds.includes(image._id))
+                      .map(image => (
+                        <li key={image._id}>
+                          <img
+                            src={image.path}
+                            alt={image.filename}
+                            style={styles.tableImage}
+                          />
+                        </li>
+                    ))}
+                  </ul>
+                </td>
+                <td style={{...styles.td, ...styles.actionColumn}}>
+                  <div style={styles.actionButtons}>
+                    <button
+                      style={styles.editButton}
+                      onClick={() => handleEdit(roomType)}
+                    >
+                      Sửa
+                    </button>
+                    <button
+                      style={styles.deleteButton}
+                      onClick={() => handleDelete(roomType._id)}
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {isModalVisible && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>Thêm loại phòng mới</h2>
+              <h2 style={styles.modalTitle}>{modalTitle}</h2>
               <button 
                 style={{...styles.removeButton, padding: '8px'}}
-                onClick={() => setIsModalVisible(false)}
+                onClick={() => {
+                  setIsModalVisible(false);
+                  setEditingId(null);
+                }}
               >
                 ✕
               </button>
