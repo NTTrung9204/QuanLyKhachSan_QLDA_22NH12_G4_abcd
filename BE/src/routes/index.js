@@ -6,6 +6,7 @@ const roomTypeRoutes = require('./roomTypeRoutes');
 const roomRoutes = require('./roomRoutes');
 const imageRoutes = require('./imageRoutes');
 const helloRoutes = require('./helloRoutes');
+const serviceRoutes = require('./serviceRoutes');
 
 const router = express.Router();
 
@@ -17,5 +18,6 @@ router.use('/room-types', roomTypeRoutes);
 router.use('/rooms', roomRoutes);
 router.use('/images', imageRoutes);
 router.use('/hello', helloRoutes);
+router.use('/services', serviceRoutes);
 
 module.exports = router; 
