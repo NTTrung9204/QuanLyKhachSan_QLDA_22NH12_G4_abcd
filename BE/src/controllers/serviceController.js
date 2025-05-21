@@ -12,6 +12,26 @@ exports.getAllServices = catchAsync(async (req, res, next) => {
 });
 
 /**
+ * Get services filtered by price range
+ */
+exports.getServicesByPriceRange = catchAsync(async (req, res, next) => {
+  const { minPrice, maxPrice } = req.query;
+  
+  let query = {};
+  
+  if (minPrice !== undefined && maxPrice !== undefined) {
+    query.price = { $gte: Number(minPrice), $lte: Number(maxPrice) };
+  } else if (minPrice !== undefined) {
+    query.price = { $gte: Number(minPrice) };
+  } else if (maxPrice !== undefined) {
+    query.price = { $lte: Number(maxPrice) };
+  }
+  
+  const services = await Service.find(query).populate('imageId');
+  ResponseHandler.success(res, 200, services, 'Services filtered by price range retrieved successfully');
+});
+
+/**
  * Get a single service
  */
 exports.getService = catchAsync(async (req, res, next) => {

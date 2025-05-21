@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', serviceController.getAllServices);
+router.get('/price', serviceController.getServicesByPriceRange);
 router.get('/:id', serviceController.getService);
 
 // Protected routes - only staff and admin
