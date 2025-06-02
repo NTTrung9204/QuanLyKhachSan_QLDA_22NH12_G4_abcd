@@ -14,4 +14,24 @@ exports.getUserBookings = catchAsync(async (req, res, next) => {
       future: bookings.future
     }
   });
+});
+
+exports.getAdminBookingHistory = catchAsync(async (req, res, next) => {
+  const result = await bookingHistoryService.getAdminBookingHistory(req.query);
+  
+  res.status(200).json({
+    status: 'success',
+    data: result
+  });
+});
+
+exports.getBookingDetails = catchAsync(async (req, res, next) => {
+  const booking = await bookingHistoryService.getBookingDetails(req.params.bookingId);
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      booking
+    }
+  });
 }); 
