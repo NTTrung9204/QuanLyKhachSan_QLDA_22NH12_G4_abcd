@@ -8,6 +8,7 @@ const imageRoutes = require('./imageRoutes');
 const helloRoutes = require('./helloRoutes');
 const serviceRoutes = require('./serviceRoutes');
 const bookingRoutes = require('./bookingRoutes');
+const homeRoutes = require('./homeRoutes');
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.use('/images', imageRoutes);
 router.use('/hello', helloRoutes);
 router.use('/services', serviceRoutes);
 router.use('/bookings', bookingRoutes);
+router.use('/home', homeRoutes);
 
 module.exports = router; 
