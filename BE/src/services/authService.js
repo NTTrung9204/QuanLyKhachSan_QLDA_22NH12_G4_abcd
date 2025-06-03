@@ -8,12 +8,18 @@ const jwtUtils = require('../utils/jwtUtils');
  * @returns {Object} User and token
  */
 exports.registerUser = async (userData) => {
-  const { username, password, fullName, phone, address, cccd, birthDate, gender } = userData;
+  const { username, password, fullName, email, phone, address, cccd, birthDate, gender } = userData;
   
   // Check if username already exists
   const existingUser = await User.findOne({ username });
   if (existingUser) {
     throw new AppError('Username already in use', 400);
+  }
+
+  // Check if email already exists
+  const existingEmail = await User.findOne({ 'profile.email': email });
+  if (existingEmail) {
+    throw new AppError('Email already in use', 400);
   }
 
   // Create new user
@@ -23,6 +29,7 @@ exports.registerUser = async (userData) => {
     role: 'customer', // Default role
     profile: {
       fullName,
+      email,
       phone,
       address,
       cccd,
