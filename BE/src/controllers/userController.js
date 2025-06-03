@@ -25,13 +25,26 @@ exports.getUserProfile = catchAsync(async (req, res, next) => {
  * Update current user profile
  */
 exports.updateMyProfile = catchAsync(async (req, res, next) => {
-  const { fullName, phone, address, cccd, birthDate, gender } = req.body;
+  const { fullName, email, phone, address, cccd, birthDate, gender } = req.body;
   
+  // Check if email is being changed and if it's already in use
+  if (email && email !== req.user.profile.email) {
+    const existingEmail = await User.findOne({ 
+      _id: { $ne: req.user._id }, 
+      'profile.email': email 
+    });
+    
+    if (existingEmail) {
+      throw new AppError('Email already in use', 400);
+    }
+  }
+
   // Find user by ID and update profile
   const updatedUser = await User.findByIdAndUpdate(
     req.user._id,
     {
       'profile.fullName': fullName,
+      'profile.email': email,
       'profile.phone': phone,
       'profile.address': address,
       'profile.cccd': cccd,
