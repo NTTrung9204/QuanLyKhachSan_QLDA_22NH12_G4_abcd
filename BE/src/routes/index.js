@@ -11,6 +11,7 @@ const bookingRoutes = require('./bookingRoutes');
 const homeRoutes = require('./homeRoutes');
 const bookingHistoryRoutes = require('./bookingHistoryRoutes');
 const serviceManagementRoutes = require('./serviceManagementRoutes');
+const billingRoutes = require('./billingRoutes');
 
 const router = express.Router();
 
@@ -27,5 +28,6 @@ router.use('/bookings', bookingRoutes);
 router.use('/home', homeRoutes);
 router.use('/booking-history', bookingHistoryRoutes);
 router.use('/service-management', serviceManagementRoutes);
+router.use('/billing', billingRoutes);
 
 module.exports = router; 
