@@ -134,6 +134,43 @@ exports.getBooking = async (bookingId, user) => {
 };
 
 /**
+ * Check for overlapping bookings for a room
+ */
+const checkRoomAvailability = async (roomId, checkIn, checkOut, excludeBookingId = null) => {
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+
+  // Find any overlapping bookings
+  const query = {
+    'rooms.roomId': roomId,
+    'rooms.checkIn': { $lt: checkOutDate },
+    'rooms.checkOut': { $gt: checkInDate },
+    status: { $in: ['pending', 'checked_in'] }
+  };
+
+  // If we're updating a booking, exclude the current booking from the check
+  if (excludeBookingId) {
+    query._id = { $ne: excludeBookingId };
+  }
+
+  const overlappingBookings = await Booking.find(query);
+
+  if (overlappingBookings.length > 0) {
+    // Find the specific overlapping room booking for better error message
+    const overlappingRoom = overlappingBookings[0].rooms.find(
+      room => room.roomId.toString() === roomId.toString() &&
+      new Date(room.checkIn) < checkOutDate &&
+      new Date(room.checkOut) > checkInDate
+    );
+
+    throw new AppError(
+      `Room is already booked from ${new Date(overlappingRoom.checkIn).toLocaleDateString()} to ${new Date(overlappingRoom.checkOut).toLocaleDateString()}`,
+      400
+    );
+  }
+};
+
+/**
  * Create a new booking
  */
 exports.createBooking = async (bookingData, user) => {
@@ -169,6 +206,9 @@ exports.createBooking = async (bookingData, user) => {
     if (checkIn >= checkOut) {
       throw new AppError('Check-out date must be after check-in date', 400);
     }
+
+    // Check for overlapping bookings
+    await checkRoomAvailability(room.roomId, checkIn, checkOut);
   }
   
   // Validate services if provided
@@ -198,15 +238,13 @@ exports.createBooking = async (bookingData, user) => {
     }
   }
   
-  // If user is a customer, set customerId to their own ID
+  // Set customerId based on user role
   if (user.role === 'customer') {
+    // Customers can only book for themselves
     newBookingData.customerId = user._id;
-  } else if (user.role === 'staff' || user.role === 'admin') {
-    // Staff/admin need to specify a customer and set staffId to their own ID
-    if (!newBookingData.customerId) {
-      throw new AppError('Customer ID is required when creating a booking as staff/admin', 400);
-    }
-    newBookingData.staffId = user._id;
+  } else if (!newBookingData.customerId) {
+    // Staff/admin must specify a customer
+    throw new AppError('Customer ID is required', 400);
   }
   
   try {
@@ -274,9 +312,14 @@ exports.updateBooking = async (bookingId, updateData, user) => {
       throw new AppError('You are not authorized to update this booking', 403);
     }
     
-    // Customers can only update bookings with status 'pending'
+    // Customers can only update pending bookings
     if (booking.status !== 'pending') {
       throw new AppError('You can only update pending bookings', 400);
+    }
+    
+    // Customers cannot update customerId
+    if (updateData.customerId) {
+      throw new AppError('You cannot change the customer for this booking', 403);
     }
   } else if (user.role === 'staff' || user.role === 'admin') {
     // Staff/admin can update staffId
@@ -313,6 +356,9 @@ exports.updateBooking = async (bookingId, updateData, user) => {
       if (checkIn >= checkOut) {
         throw new AppError('Check-out date must be after check-in date', 400);
       }
+
+      // Check for overlapping bookings, excluding the current booking
+      await checkRoomAvailability(room.roomId, checkIn, checkOut, bookingId);
     }
   }
   
