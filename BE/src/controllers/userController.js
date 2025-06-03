@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const { catchAsync } = require('../utils/errorHandler');
 const { AppError } = require('../utils/errorHandler');
 const ResponseHandler = require('../utils/responseHandler');
+const UserService = require('../services/userService');
 
 /**
  * Get current user profile
@@ -9,6 +10,15 @@ const ResponseHandler = require('../utils/responseHandler');
 exports.getMyProfile = catchAsync(async (req, res, next) => {
   // User is already available from the protect middleware
   ResponseHandler.send(res, 200, req.user);
+});
+
+exports.getUserProfile = catchAsync(async (req, res, next) => {
+  const { cccd } = req.params;
+
+  // Find user by cccd
+  const user = await UserService.getUserByCccd(cccd);
+
+  ResponseHandler.send(res, 200, user);
 });
 
 /**

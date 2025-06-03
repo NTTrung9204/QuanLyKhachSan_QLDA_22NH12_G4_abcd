@@ -40,6 +40,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
+
+
 /**
  * Restrict access to certain roles
  * @param  {...string} roles - Allowed roles

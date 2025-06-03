@@ -41,7 +41,7 @@ const styles = {
     
     label: {
         fontWeight: '500',
-        color: '#555'
+        color: '#000'
     },
     
     input: {
@@ -51,6 +51,8 @@ const styles = {
         fontSize: '1rem',
         outline: 'none',
         transition: 'border-color 0.2s',
+        backgroundColor: 'white',
+        color: '#000',
         '&:focus': {
             borderColor: '#2196f3'
         }
@@ -189,6 +191,153 @@ const styles = {
         borderRadius: '4px',
         fontSize: '0.9rem',
         display: 'inline-block'
+    },
+    selectedRoomInfo: {
+        marginTop: '20px',
+        padding: '20px',
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+    },
+    customerForm: {
+        display: 'flex',
+        gap: '10px',
+        marginBottom: '20px',
+        alignItems: 'flex-end'
+    },
+    customerInputGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+        gap: '5px'
+    },
+    customerInfo: {
+        marginTop: '20px',
+        padding: '15px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+        border: '1px solid #e9ecef'
+    },
+    customerInfoGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '10px'
+    },
+    customerInfoItem: {
+        margin: '5px 0'
+    },
+    customerLabel: {
+        fontWeight: 'bold',
+        marginRight: '5px'
+    },
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        zIndex: 1000,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    popup: {
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+        padding: '25px',
+        width: '85%',
+        maxWidth: '900px',
+        maxHeight: '90vh',
+        overflow: 'auto'
+    },
+    popupHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottom: '1px solid #eee',
+        paddingBottom: '15px',
+        marginBottom: '25px'
+    },
+    popupTitle: {
+        fontSize: '1.5rem',
+        fontWeight: 'bold',
+        color: '#000'
+    },
+    closeButton: {
+        background: 'none',
+        border: 'none',
+        fontSize: '1.5rem',
+        cursor: 'pointer',
+        color: '#666'
+    },
+    formSection: {
+        marginBottom: '30px',
+        padding: '0 10px'
+    },
+    sectionTitle: {
+        fontSize: '1.2rem',
+        fontWeight: 'bold',
+        marginBottom: '15px',
+        color: '#000'
+    },
+    formGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '20px'
+    },
+    formInputGroup: {
+        marginBottom: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px'
+    },
+    confirmButton: {
+        padding: '12px 24px',
+        backgroundColor: '#4caf50',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        fontSize: '1rem',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s',
+        '&:hover': {
+            backgroundColor: '#388e3c'
+        }
+    },
+    cancelButton: {
+        padding: '12px 24px',
+        backgroundColor: '#f44336',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        fontSize: '1rem',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s',
+        '&:hover': {
+            backgroundColor: '#d32f2f'
+        }
+    },
+    buttonGroup: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginTop: '30px',
+        gap: '15px'
+    },
+    formRow: {
+        display: 'flex',
+        gap: '20px',
+        marginBottom: '20px'
+    },
+    formInputContainer: {
+        flex: 1
+    },
+    readOnlyInput: {
+        backgroundColor: 'white',
+        cursor: 'not-allowed',
+        border: '1px solid #eee',
+        color: '#000'
     }
 };
 
@@ -220,6 +369,20 @@ export default function BookingManagePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [roomTypesData, setRoomTypesData] = useState([]);
+    const [selectedRoom, setSelectedRoom] = useState(null);
+    const [cccd, setCccd] = useState('');
+    const [customerInfo, setCustomerInfo] = useState(null);
+    const [searchingCustomer, setSearchingCustomer] = useState(false);
+    const [customerError, setCustomerError] = useState(null);
+    const [booking, setBooking] = useState({
+        customerName: '',
+        customerCccd: '',
+        customerPhone: '',
+        customerAddress: '',
+        customerId: '',
+        notes: '',
+        paymentMethod: 'cash'
+    });
 
     useEffect(() => {
         fetchRoomTypes();
@@ -289,6 +452,81 @@ export default function BookingManagePage() {
             style: 'currency',
             currency: 'VND'
         }).format(price);
+    };
+
+    const handleRoomSelect = (room) => {
+        setSelectedRoom(room);
+        // Reset customer info when selecting a new room
+        setCustomerInfo(null);
+        setCccd('');
+        setBooking({
+            customerName: '',
+            customerCccd: '',
+            customerPhone: '',
+            customerAddress: '',
+            customerId: '',
+            notes: '',
+            paymentMethod: 'cash'
+        });
+    };
+
+    const searchCustomerByCccd = async () => {
+        if (!cccd.trim()) {
+            setCustomerError("Vui lòng nhập số CCCD");
+            return;
+        }
+
+        try {
+            setSearchingCustomer(true);
+            setCustomerError(null);
+            
+            const response = await api.get(`/api/users/profile/${cccd}`);
+            const customer = response.data.data;
+            setCustomerInfo(customer);
+            
+            // Populate booking form with customer data
+            setBooking(prev => ({
+                ...prev,
+                customerName: customer.profile?.fullName || '',
+                customerCccd: customer.profile?.cccd || '',
+                customerPhone: customer.profile?.phone || '',
+                customerAddress: customer.profile?.address || '',
+                customerId: customer._id || ''
+            }));
+        } catch (err) {
+            console.error('Error fetching customer:', err);
+            setCustomerError(err.response?.data?.message || 'Không tìm thấy khách hàng với CCCD này');
+            setCustomerInfo(null);
+        } finally {
+            setSearchingCustomer(false);
+        }
+    };
+
+    const handleBookingInputChange = (e) => {
+        const { name, value } = e.target;
+        setBooking(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleCreateBooking = async () => {
+        // TODO: Implement booking creation logic
+        console.log('Customer ID:', booking.customerId);
+        alert('Chức năng đặt phòng sẽ được triển khai sau');
+        handleClosePopup();
+    };
+
+    const handleClosePopup = () => {
+        setSelectedRoom(null);
+        setCustomerInfo(null);
+        setCccd('');
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN');
     };
 
     return (
@@ -388,7 +626,14 @@ export default function BookingManagePage() {
                                 {roomTypeData.availableRooms && roomTypeData.availableRooms.length > 0 ? (
                                     <div style={styles.roomsGrid}>
                                         {roomTypeData.availableRooms.map((room) => (
-                                            <div key={room._id} style={styles.roomCard}>
+                                            <div 
+                                                key={room._id} 
+                                                style={{
+                                                    ...styles.roomCard,
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => handleRoomSelect(room)}
+                                            >
                                                 <div style={styles.roomName}>{room.name}</div>
                                                 <div style={styles.floorBadge}>Tầng {room.floor}</div>
                                             </div>
@@ -406,6 +651,198 @@ export default function BookingManagePage() {
                     )}
                 </div>
             </div>
+
+            {selectedRoom && (
+                <div style={styles.overlay}>
+                    <div style={styles.popup}>
+                        <div style={styles.popupHeader}>
+                            <h2 style={styles.popupTitle}>Đặt Phòng {selectedRoom.name}</h2>
+                            <button style={styles.closeButton} onClick={handleClosePopup}>×</button>
+                        </div>
+
+                        <div style={styles.formSection}>
+                            <h3 style={styles.sectionTitle}>Thông tin phòng</h3>
+                            <div style={styles.formGrid}>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="roomName">Phòng:</label>
+                                    <input
+                                        style={{...styles.input, ...styles.readOnlyInput}}
+                                        type="text"
+                                        id="roomName"
+                                        value={selectedRoom.name}
+                                        readOnly
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="roomFloor">Tầng:</label>
+                                    <input
+                                        style={{...styles.input, ...styles.readOnlyInput}}
+                                        type="text"
+                                        id="roomFloor"
+                                        value={selectedRoom.floor}
+                                        readOnly
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="checkInTime">Check-in:</label>
+                                    <input
+                                        style={{...styles.input, ...styles.readOnlyInput}}
+                                        type="text"
+                                        id="checkInTime"
+                                        value={new Date(checkIn).toLocaleString('vi-VN')}
+                                        readOnly
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="checkOutTime">Check-out:</label>
+                                    <input
+                                        style={{...styles.input, ...styles.readOnlyInput}}
+                                        type="text"
+                                        id="checkOutTime"
+                                        value={new Date(checkOut).toLocaleString('vi-VN')}
+                                        readOnly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style={styles.formSection}>
+                            <h3 style={styles.sectionTitle}>Thông tin khách hàng</h3>
+                            
+                            <div style={styles.formRow}>
+                                <div style={styles.formInputContainer}>
+                                    <label style={styles.label} htmlFor="cccd">CCCD/CMND:</label>
+                                    <div style={{display: 'flex', gap: '10px'}}>
+                                        <input
+                                            style={styles.input}
+                                            type="text"
+                                            id="cccd"
+                                            value={cccd}
+                                            onChange={(e) => setCccd(e.target.value)}
+                                            placeholder="Nhập số CCCD/CMND"
+                                        />
+                                        <button 
+                                            style={{...styles.searchButton, marginTop: 0, height: '41px'}}
+                                            onClick={searchCustomerByCccd}
+                                            disabled={searchingCustomer}
+                                        >
+                                            {searchingCustomer ? 'Đang tìm...' : 'Tìm kiếm'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {customerError && (
+                                <div style={{color: 'red', marginBottom: '15px', padding: '0 5px'}}>
+                                    {customerError}
+                                </div>
+                            )}
+                            
+                            <div style={styles.formGrid}>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="customerName">Họ tên:</label>
+                                    <input
+                                        style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
+                                        type="text"
+                                        id="customerName"
+                                        name="customerName"
+                                        value={booking.customerName}
+                                        onChange={handleBookingInputChange}
+                                        placeholder="Họ tên khách hàng"
+                                        readOnly={customerInfo !== null}
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="customerCccd">CCCD/CMND:</label>
+                                    <input
+                                        style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
+                                        type="text"
+                                        id="customerCccd"
+                                        name="customerCccd"
+                                        value={booking.customerCccd}
+                                        onChange={handleBookingInputChange}
+                                        placeholder="Số CCCD/CMND"
+                                        readOnly={customerInfo !== null}
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="customerPhone">Số điện thoại:</label>
+                                    <input
+                                        style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
+                                        type="text"
+                                        id="customerPhone"
+                                        name="customerPhone"
+                                        value={booking.customerPhone}
+                                        onChange={handleBookingInputChange}
+                                        placeholder="Số điện thoại"
+                                        readOnly={customerInfo !== null}
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="customerAddress">Địa chỉ:</label>
+                                    <input
+                                        style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
+                                        type="text"
+                                        id="customerAddress"
+                                        name="customerAddress"
+                                        value={booking.customerAddress}
+                                        onChange={handleBookingInputChange}
+                                        placeholder="Địa chỉ"
+                                        readOnly={customerInfo !== null}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style={styles.formSection}>
+                            <h3 style={styles.sectionTitle}>Thông tin thanh toán</h3>
+                            <div style={styles.formGrid}>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="paymentMethod">Phương thức thanh toán:</label>
+                                    <select
+                                        style={styles.input}
+                                        id="paymentMethod"
+                                        name="paymentMethod"
+                                        value={booking.paymentMethod}
+                                        onChange={handleBookingInputChange}
+                                    >
+                                        <option value="cash">Tiền mặt</option>
+                                        <option value="credit_card">Thẻ tín dụng</option>
+                                        <option value="bank_transfer">Chuyển khoản</option>
+                                    </select>
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="notes">Ghi chú:</label>
+                                    <input
+                                        style={styles.input}
+                                        type="text"
+                                        id="notes"
+                                        name="notes"
+                                        value={booking.notes}
+                                        onChange={handleBookingInputChange}
+                                        placeholder="Ghi chú đặt phòng"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style={styles.buttonGroup}>
+                            <button 
+                                style={styles.cancelButton}
+                                onClick={handleClosePopup}
+                            >
+                                Hủy
+                            </button>
+                            <button 
+                                style={styles.confirmButton}
+                                onClick={handleCreateBooking}
+                            >
+                                Đặt phòng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
