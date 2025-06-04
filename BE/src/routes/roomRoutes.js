@@ -7,6 +7,7 @@ const router = express.Router();
 // Public routes
 router.get('/', roomController.getAllRooms);
 router.get('/available', roomController.getAvailableRooms);
+router.get('/available-for-date', roomController.getAvailableRoomsForDate);
 router.get('/floor/:floor', roomController.getRoomsByFloor);
 router.get('/type/:roomTypeId', roomController.getRoomsByType);
 router.get('/:id', roomController.getRoom);
