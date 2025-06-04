@@ -149,3 +149,65 @@ exports.getAvailableRooms = catchAsync(async (req, res, next) => {
     'Available rooms retrieved successfully'
   );
 }); 
+
+/**
+ * Get available rooms for a specific date
+ */
+exports.getAvailableRoomsForDate = catchAsync(async (req, res, next) => {
+  // Check if required query parameter is provided
+  const { date } = req.query;
+
+  if (!date) {
+    return next(new AppError('Please provide a date', 400));
+  }
+
+  // Get available rooms based on provided date and optional roomTypeId
+  const availableRooms = await roomService.getAvailableRoomsForDate(
+    date,
+    req.query.roomTypeId
+  );
+
+  // Group available rooms by room type for easier client-side processing
+  const roomsByType = {};
+
+  availableRooms.forEach((room) => {
+    const roomTypeId = room.roomTypeId._id.toString();
+
+    if (!roomsByType[roomTypeId]) {
+      // Initialize room type data
+      roomsByType[roomTypeId] = {
+        roomTypeId: roomTypeId,
+        name: room.roomTypeId.name,
+        pricePerNight: room.roomTypeId.pricePerNight,
+        maxAdult: room.roomTypeId.maxAdult,
+        maxChild: room.roomTypeId.maxChild,
+        description: room.roomTypeId.description,
+        amenities: room.roomTypeId.amenities,
+        imageUrls: room.roomTypeId.imageId?.map((img) => img.url) || [],
+        availableRooms: [],
+      };
+    }
+
+    // Add room to the corresponding room type
+    roomsByType[roomTypeId].availableRooms.push({
+      _id: room._id,
+      name: room.name,
+      floor: room.floor,
+      status: room.status,
+    });
+  });
+
+  // Convert the object to an array
+  const result = Object.values(roomsByType);
+
+  ResponseHandler.success(
+    res,
+    200,
+    {
+      date,
+      totalAvailableRooms: availableRooms.length,
+      roomTypes: result,
+    },
+    'Available rooms for the date retrieved successfully'
+  );
+});
