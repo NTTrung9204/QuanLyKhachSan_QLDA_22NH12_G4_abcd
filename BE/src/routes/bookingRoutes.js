@@ -19,7 +19,8 @@ router.patch('/:id/cancel', bookingController.cancelBooking);
 
 // Routes for staff and admin only
 router.use(authMiddleware.restrictTo('staff', 'admin'));
+router.get('/customer/cccd/:cccd', bookingController.getBookingsByCustomerCCCD);
 router.patch('/:id/check-in', bookingController.checkIn);
 router.patch('/:id/check-out', bookingController.checkOut);
 
-module.exports = router; 
+module.exports = router;

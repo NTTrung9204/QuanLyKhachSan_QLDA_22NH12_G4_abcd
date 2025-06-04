@@ -2,6 +2,7 @@ const Booking = require('../models/bookingModel');
 const Room = require('../models/roomModel');
 const RoomType = require('../models/roomTypeModel');
 const Service = require('../models/serviceModel');
+const User = require('../models/userModel');
 const { AppError } = require('../utils/errorHandler');
 
 /**
@@ -569,26 +570,26 @@ exports.cancelBooking = async (bookingId, user) => {
   if (!booking) {
     throw new AppError('No booking found with that ID', 404);
   }
-  
+
   // Check permissions
   if (user.role === 'customer') {
     // Customers can only cancel their own bookings
     if (booking.customerId.toString() !== user._id.toString()) {
       throw new AppError('You are not authorized to cancel this booking', 403);
     }
-    
+
     // Customers can only cancel pending bookings
     if (booking.status !== 'pending') {
       throw new AppError('You can only cancel pending bookings', 400);
     }
   }
-  
+
   // Update the staffId for staff/admin
   const updateData = { status: 'cancelled' };
   if (user.role === 'staff' || user.role === 'admin') {
     updateData.staffId = user._id;
   }
-  
+
   // Update booking status
   return await Booking.findByIdAndUpdate(
     bookingId,
@@ -612,4 +613,46 @@ exports.cancelBooking = async (bookingId, user) => {
       path: 'services.serviceId',
       select: 'name price'
     });
-}; 
+};
+
+/**
+ * Get bookings by customer CCCD
+ * Only staff and admin can access this feature
+ */
+exports.getBookingsByCustomerCCCD = async (cccd, currentUser) => {
+  // Check if user has permission (staff or admin only)
+  if (currentUser.role !== 'admin' && currentUser.role !== 'staff') {
+    throw new AppError(
+      'You do not have permission to access this resource',
+      403
+    );
+  }
+
+  // Find the user with the given CCCD
+  const customer = await User.findOne({ 'profile.cccd': cccd });
+  if (!customer) {
+    throw new AppError(`No customer found with CCCD: ${cccd}`, 404);
+  }
+
+  // Find all bookings for this customer
+  const bookings = await Booking.find({ customerId: customer._id })
+    .populate({
+      path: 'customerId',
+      select: 'profile.fullName profile.email profile.phone profile.cccd',
+    })
+    .populate({
+      path: 'staffId',
+      select: 'profile.fullName',
+    })
+    .populate({
+      path: 'rooms.roomId',
+      populate: {
+        path: 'roomTypeId',
+        select: 'name pricePerNight',
+      },
+    })
+    .populate('services.serviceId')
+    .sort({ createdAt: -1 });
+
+  return bookings;
+};
