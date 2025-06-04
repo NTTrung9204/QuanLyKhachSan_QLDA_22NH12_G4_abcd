@@ -97,7 +97,7 @@ exports.getBookingsByCustomerCCCD = catchAsync(async (req, res, next) => {
  * Admin/staff can see all bookings, customers can only see their own bookings
  */
 exports.getBookingsByDateRange = catchAsync(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
-  const bookings = await bookingService.getBookingsByDateRange(startDate, endDate, req.user);
+  const { checkIn, checkOut } = req.query;
+  const bookings = await bookingService.getBookingsByDateRange(checkIn, checkOut, req.user);
   ResponseHandler.success(res, 200, bookings, 'Bookings within date range retrieved successfully');
 });
