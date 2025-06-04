@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import axios from '../api/axios';
-import api from '../api/axios';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     username: '',
+    email: '',
     password: '',
     confirmPassword: '',
     fullName: '',
@@ -20,9 +18,6 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,7 +28,7 @@ const RegisterPage = () => {
   };
 
   const validateForm = () => {
-    if (!formData.username || !formData.password || !formData.confirmPassword || 
+    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword || 
         !formData.fullName || !formData.phone || !formData.address || 
         !formData.cccd || !formData.birthDate) {
       setError('Vui lòng điền đầy đủ thông tin');
@@ -42,6 +37,12 @@ const RegisterPage = () => {
 
     if (formData.username.length < 4) {
       setError('Tên đăng nhập phải có ít nhất 4 ký tự');
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Email không hợp lệ');
       return false;
     }
 
@@ -80,10 +81,9 @@ const RegisterPage = () => {
     setLoading(true);
     
     try {
-      // Here you would normally call your API to register the user
-
       const newUser = {
         username: formData.username,
+        email: formData.email,
         password: formData.password,
         fullName: formData.fullName,
         phone: formData.phone,
@@ -93,193 +93,195 @@ const RegisterPage = () => {
         gender: formData.gender,
       };
 
-      console.log('New user data:', newUser);
-
-      await api.post('/api/auth/signup', newUser);
-
-      setTimeout(() => {
-        setSuccess('Đăng ký thành công! Đang chuyển hướng...');
-        
+      // Gọi API thực tế thay vì giả lập
+      const response = await axios.post('/api/auth/signup', newUser);
+      
+      if (response.data) {
+        setSuccess('Đăng ký thành công! Chào mừng bạn đến với khách sạn của chúng tôi!');
+        // Có thể chuyển hướng người dùng đến trang đăng nhập
         setTimeout(() => {
-          login(newUser);
-          navigate('/login');
-        }, 1500);
-        
-        setLoading(false);
-      }, 1500);
+          window.location.href = '/login';
+        }, 2000);
+      }
+      setLoading(false);
       
     } catch (error) {
-      setError('Đăng ký thất bại. Vui lòng thử lại sau.');
+      console.error(error);
+      setError(error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại sau.');
       setLoading(false);
     }
   };
 
+  const handleGoogleSignup = () => {
+    console.log('Continue with Google');
+  };
+
+  const handleFacebookSignup = () => {
+    console.log('Continue with Facebook');
+  };
+
   return (
     <div style={styles.container}>
-      <div style={styles.formWrapper}>
-        <div style={styles.leftColumn}>
-          <div style={styles.formHeader}>
-            <h2 style={styles.heading}>Đăng ký tài khoản</h2>
-            <p style={styles.subheading}>Vui lòng điền đầy đủ thông tin để tạo tài khoản</p>
+      <div style={styles.sidePanel}>
+        <div style={styles.imageContainer}>
+          <img 
+            src="https://images.unsplash.com/photo-1571896349842-33c89424de2d"
+            alt="Hotel view left"
+            style={styles.backgroundImage}
+          />
+          <div style={styles.overlay}></div>
+        </div>
+      </div>
+
+      <div style={styles.centerPanel}>
+        <div style={styles.formContainer}>
+          <div style={styles.logoContainer}>
+            <div style={styles.logo}>
+              <div style={styles.logoIcon}></div>
+            </div>
+          </div>
+
+          <div style={styles.header}>
+            <h2 style={styles.title}>Đăng ký tài khoản</h2>
+            <p style={styles.subtitle}>
+              Tiết kiệm đến 10% ngay trên lần đầu đặt phòng khi đăng ký miễn phí
+            </p>
           </div>
 
           {error && (
-            <div style={styles.alertDanger}>
-              <i style={styles.icon}>⚠️</i> {error}
-            </div>
-          )}
-          
-          {success && (
-            <div style={styles.alertSuccess}>
-              <i style={styles.icon}>✓</i> {success}
+            <div style={styles.alert}>
+              <span style={styles.alertIcon}>⚠️</span>
+              {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={styles.form}>
+          {success && (
+            <div style={styles.successAlert}>
+              <span style={styles.alertIcon}>✓</span>
+              {success}
+            </div>
+          )}
+
+          <form style={styles.form} onSubmit={handleSubmit}>
             <div style={styles.formSection}>
-              <div style={styles.sectionTitle}>Thông tin tài khoản</div>
-              <div style={styles.formGroup}>
-                <label style={styles.formLabel} htmlFor="username">
-                  Tên đăng nhập <span style={styles.requiredMark}>*</span>
-                </label>
+              <h4 style={styles.sectionTitle}>Thông tin tài khoản</h4>
+              
+              <div style={styles.inputGroup}>
                 <input
-                  style={styles.formInput}
+                  style={styles.input}
                   type="text"
-                  id="username"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
+                  placeholder="Tên đăng nhập"
                   required
-                  placeholder="Ví dụ: john_doe"
                 />
               </div>
 
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel} htmlFor="password">
-                    Mật khẩu <span style={styles.requiredMark}>*</span>
-                  </label>
+              <div style={styles.inputGroup}>
+                <input
+                  style={styles.input}
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Địa chỉ email"
+                  required
+                />
+              </div>
+
+              <div style={styles.inputRow}>
+                <div style={styles.inputGroup}>
                   <input
-                    style={styles.formInput}
+                    style={styles.input}
                     type="password"
-                    id="password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    placeholder="Mật khẩu"
                     required
-                    placeholder="Tối thiểu 6 ký tự"
                   />
                 </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel} htmlFor="confirmPassword">
-                    Xác nhận mật khẩu <span style={styles.requiredMark}>*</span>
-                  </label>
+                <div style={styles.inputGroup}>
                   <input
-                    style={styles.formInput}
+                    style={styles.input}
                     type="password"
-                    id="confirmPassword"
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
+                    placeholder="Xác nhận mật khẩu"
                     required
-                    placeholder="Nhập lại mật khẩu"
                   />
                 </div>
               </div>
             </div>
 
             <div style={styles.formSection}>
-              <div style={styles.sectionTitle}>Thông tin cá nhân</div>
-              <div style={styles.formGroup}>
-                <label style={styles.formLabel} htmlFor="fullName">
-                  Họ và tên <span style={styles.requiredMark}>*</span>
-                </label>
+              <h4 style={styles.sectionTitle}>Thông tin cá nhân</h4>
+              
+              <div style={styles.inputGroup}>
                 <input
-                  style={styles.formInput}
+                  style={styles.input}
                   type="text"
-                  id="fullName"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
+                  placeholder="Họ và tên"
                   required
-                  placeholder="Ví dụ: Nguyễn Văn A"
                 />
               </div>
 
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel} htmlFor="phone">
-                    Số điện thoại <span style={styles.requiredMark}>*</span>
-                  </label>
+              <div style={styles.inputRow}>
+                <div style={styles.inputGroup}>
                   <input
-                    style={styles.formInput}
+                    style={styles.input}
                     type="tel"
-                    id="phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    placeholder="Số điện thoại"
                     required
-                    placeholder="0987654321"
                   />
                 </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel} htmlFor="cccd">
-                    CCCD <span style={styles.requiredMark}>*</span>
-                  </label>
+                <div style={styles.inputGroup}>
                   <input
-                    style={styles.formInput}
+                    style={styles.input}
                     type="text"
-                    id="cccd"
                     name="cccd"
                     value={formData.cccd}
                     onChange={handleChange}
+                    placeholder="CCCD/CMND"
                     required
-                    placeholder="12 chữ số"
                   />
                 </div>
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.formLabel} htmlFor="address">
-                  Địa chỉ <span style={styles.requiredMark}>*</span>
-                </label>
+              <div style={styles.inputGroup}>
                 <input
-                  style={styles.formInput}
+                  style={styles.input}
                   type="text"
-                  id="address"
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
+                  placeholder="Địa chỉ"
                   required
-                  placeholder="Địa chỉ đầy đủ"
                 />
               </div>
 
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel} htmlFor="birthDate">
-                    Ngày sinh <span style={styles.requiredMark}>*</span>
-                  </label>
+              <div style={styles.inputRow}>
+                <div style={styles.inputGroup}>
                   <input
-                    style={styles.formInput}
+                    style={styles.input}
                     type="date"
-                    id="birthDate"
                     name="birthDate"
                     value={formData.birthDate}
                     onChange={handleChange}
                     required
                   />
                 </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.formLabel} htmlFor="gender">
-                    Giới tính <span style={styles.requiredMark}>*</span>
-                  </label>
+                <div style={styles.inputGroup}>
                   <select
-                    style={styles.formSelect}
-                    id="gender"
+                    style={styles.select}
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
@@ -293,52 +295,56 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            <div style={styles.termsContainer}>
-              <p style={styles.termsText}>
-                Bằng cách đăng ký, bạn đồng ý với <a href="#" style={styles.termsLink}>Điều khoản dịch vụ</a> và <a href="#" style={styles.termsLink}>Chính sách bảo mật</a> của chúng tôi.
-              </p>
-            </div>
-
             <button 
               type="submit" 
-              style={loading ? {...styles.button, ...styles.buttonDisabled} : styles.button}
+              style={loading ? {...styles.registerButton, ...styles.buttonDisabled} : styles.registerButton}
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <span style={styles.spinner} role="status" aria-hidden="true"></span>
+                  <span style={styles.spinner}></span>
                   Đang xử lý...
                 </>
-              ) : 'Đăng ký'}
+              ) : 'Đăng ký miễn phí'}
+            </button>
+
+            <div style={styles.divider}>
+              <span style={styles.dividerText}>hoặc</span>
+            </div>
+
+            <button 
+              type="button"
+              style={styles.socialButton}
+              onClick={handleGoogleSignup}
+            >
+              <span style={styles.googleIcon}>G</span>
+              Tiếp tục với Google
+            </button>
+
+            <button 
+              type="button"
+              style={{...styles.socialButton, ...styles.facebookButton}}
+              onClick={handleFacebookSignup}
+            >
+              <span style={styles.facebookIcon}>f</span>
+              Tiếp tục với Facebook
             </button>
 
             <div style={styles.loginPrompt}>
-              <p>Đã có tài khoản? <Link to="/login" style={styles.link}>Đăng nhập</Link></p>
+              <p>Đã có tài khoản? <a href="/login" style={styles.loginLink}>Đăng nhập</a></p>
             </div>
           </form>
         </div>
+      </div>
 
-        <div style={styles.rightColumn}>
-          <div style={styles.welcomeSection}>
-            <h3 style={styles.welcomeTitle}>Chào mừng đến với khách sạn của chúng tôi!</h3>
-            <p style={styles.welcomeText}>
-              Đăng ký tài khoản để trải nghiệm dịch vụ đặt phòng trực tuyến và nhận nhiều ưu đãi hấp dẫn.
-            </p>
-            <div style={styles.features}>
-              <div style={styles.feature}>
-                <span style={styles.featureIcon}>🏨</span>
-                <p style={styles.featureText}>Đặt phòng dễ dàng</p>
-              </div>
-              <div style={styles.feature}>
-                <span style={styles.featureIcon}>💰</span>
-                <p style={styles.featureText}>Giá ưu đãi độc quyền</p>
-              </div>
-              <div style={styles.feature}>
-                <span style={styles.featureIcon}>🎁</span>
-                <p style={styles.featureText}>Tích điểm đổi quà</p>
-              </div>
-            </div>
-          </div>
+      <div style={styles.sidePanel}>
+        <div style={styles.imageContainer}>
+          <img 
+            src="https://images.unsplash.com/photo-1566073771259-6a8506099945"
+            alt="Hotel view right"
+            style={styles.backgroundImage}
+          />
+          <div style={styles.overlay}></div>
         </div>
       </div>
     </div>
@@ -348,300 +354,279 @@ const RegisterPage = () => {
 const styles = {
   container: {
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #f6f8fc 0%, #e9ecef 100%)',
-    padding: '2rem'
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
-  formWrapper: {
-    display: 'flex',
-    width: '100%',
-    maxWidth: '1200px',
-    background: '#ffffff',
-    borderRadius: '20px',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-    overflow: 'hidden'
-  },
-  leftColumn: {
+  sidePanel: {
     flex: '1',
-    padding: '1.5rem',
-    minWidth: 0,
-    maxWidth: '100%'
+    position: 'relative',
+    minHeight: '100vh'
   },
-  rightColumn: {
-    width: '400px',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-    padding: '2rem',
-    color: '#ffffff',
+  centerPanel: {
+    flex: '0 0 480px',
+    backgroundColor: '#ffffff',
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '2rem',
+    boxShadow: '0 0 20px rgba(0,0,0,0.1)'
+  },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: '100%'
+  },
+  backgroundImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover'
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(147, 51, 234, 0.3) 100%)'
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: '400px'
+  },
+  logoContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '2rem'
+  },
+  logo: {
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'center'
   },
-  formHeader: {
-    marginBottom: '1.5rem',
-    textAlign: 'left'
+  logoIcon: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    position: 'relative',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '20px',
+      height: '20px',
+      backgroundColor: '#ffffff',
+      borderRadius: '50%'
+    }
   },
-  heading: {
-    fontSize: '1.8rem',
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: '0.3rem',
-    textAlign: 'center'
+  header: {
+    textAlign: 'center',
+    marginBottom: '2rem'
   },
-  subheading: {
-    fontSize: '1rem',
-    color: '#64748b',
-    textAlign: 'center'
+  title: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: '0.5rem'
   },
-  alertDanger: {
-    backgroundColor: '#fee2e2',
-    color: '#991b1b',
-    padding: '1rem',
-    marginBottom: '1.5rem',
-    borderRadius: '8px',
+  subtitle: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    lineHeight: '1.4'
+  },
+  alert: {
+    backgroundColor: '#fef2f2',
+    border: '1px solid #fecaca',
+    color: '#dc2626',
+    padding: '0.75rem',
+    borderRadius: '6px',
+    marginBottom: '1rem',
+    fontSize: '0.875rem',
     display: 'flex',
     alignItems: 'center'
   },
-  alertSuccess: {
-    backgroundColor: '#dcfce7',
+  successAlert: {
+    backgroundColor: '#f0fdf4',
+    border: '1px solid #bbf7d0',
     color: '#166534',
-    padding: '1rem',
-    marginBottom: '1.5rem',
-    borderRadius: '8px',
+    padding: '0.75rem',
+    borderRadius: '6px',
+    marginBottom: '1rem',
+    fontSize: '0.875rem',
     display: 'flex',
     alignItems: 'center'
   },
-  icon: {
+  alertIcon: {
     marginRight: '0.5rem'
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem',
-    width: '100%'
+    gap: '1.5rem'
   },
   formSection: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.8rem',
-    padding: '1rem',
-    backgroundColor: '#f8fafc',
-    borderRadius: '12px',
-    marginBottom: '1rem',
-    border: '1px solid #e2e8f0',
-    width: '100%',
-    boxSizing: 'border-box'
+    gap: '1rem'
   },
   sectionTitle: {
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     fontWeight: '600',
-    color: '#1e293b',
-    marginBottom: '0.8rem',
-    paddingBottom: '0.3rem',
-    borderBottom: '2px solid #e2e8f0'
+    color: '#374151',
+    marginBottom: '0.5rem',
+    paddingBottom: '0.5rem',
+    borderBottom: '1px solid #e5e7eb'
   },
-  formRow: {
+  inputGroup: {
     display: 'flex',
-    gap: '1rem',
+    flexDirection: 'column'
+  },
+  inputRow: {
+    display: 'flex',
+    gap: '0.75rem'
+  },
+  input: {
     width: '100%',
-    flexWrap: 'wrap'
-  },
-  formGroup: {
-    flex: '1',
-    minWidth: '250px',
-    maxWidth: '100%',
-    marginBottom: '0.8rem',
-    position: 'relative'
-  },
-  formLabel: {
-    display: 'block',
-    marginBottom: '0.4rem',
-    fontSize: '0.95rem',
-    fontWeight: '600',
-    color: '#334155',
-    textAlign: 'left',
-    letterSpacing: '0.3px'
-  },
-  requiredMark: {
-    color: '#dc2626',
-    marginLeft: '3px',
-    fontSize: '1rem'
-  },
-  formInput: {
-    width: '100%',
-    padding: '0.6rem 0.8rem',
-    fontSize: '0.95rem',
-    backgroundColor: '#fff',
-    color: '#1e293b',
-    border: '2px solid #e2e8f0',
-    borderRadius: '8px',
-    transition: 'all 0.2s ease',
+    padding: '0.75rem',
+    fontSize: '0.875rem',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
     outline: 'none',
+    transition: 'border-color 0.15s ease-in-out',
+    backgroundColor: '#ffffff',
     boxSizing: 'border-box',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-    '&:hover': {
-      borderColor: '#cbd5e1'
-    },
     '&:focus': {
       borderColor: '#3b82f6',
       boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
     },
     '&::placeholder': {
-      color: '#94a3b8',
-      fontSize: '0.9rem'
+      color: '#9ca3af'
     }
   },
-  formInputWithIcon: {
+  select: {
     width: '100%',
     padding: '0.75rem',
-    paddingRight: '2.5rem',
-    fontSize: '1rem',
-    backgroundColor: '#fff',  
-    color: '#000',    
-    border: '1.5px solid #e2e8f0',
-    borderRadius: '8px',
-    transition: 'all 0.2s',
-    outline: 'none'
-  },
-  inputWithIcon: {
-    position: 'relative'
-  },
-  inputIcon: {
-    position: 'absolute',
-    right: '0.75rem',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    color: '#94a3b8'
-  },
-  formSelect: {
-    width: '100%',
-    padding: '0.6rem 0.8rem',
-    fontSize: '0.95rem',
-    backgroundColor: '#fff',
-    color: '#1e293b',
-    border: '2px solid #e2e8f0',
-    borderRadius: '8px',
-    transition: 'all 0.2s ease',
-    outline: 'none',
-    boxSizing: 'border-box',
-    cursor: 'pointer',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-    appearance: 'none',
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8.5l-4-4h8z'/%3E%3C/svg%3E")`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'right 1rem center',
-    paddingRight: '2.5rem'
-  },
-  termsContainer: {
-    padding: '0.8rem',
-    backgroundColor: '#f8fafc',
-    borderRadius: '8px',
-    marginTop: '0.8rem'
-  },
-  termsText: {
     fontSize: '0.875rem',
-    color: '#64748b',
-    textAlign: 'center'
-  },
-  termsLink: {
-    color: '#3b82f6',
-    textDecoration: 'none',
-    fontWeight: '500',
-    '&:hover': {
-      textDecoration: 'underline'
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    outline: 'none',
+    backgroundColor: '#ffffff',
+    cursor: 'pointer',
+    boxSizing: 'border-box',
+    '&:focus': {
+      borderColor: '#3b82f6',
+      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
     }
   },
-  button: {
+  registerButton: {
     width: '100%',
-    padding: '0.8rem',
-    fontSize: '1rem',
+    padding: '0.75rem',
+    fontSize: '0.875rem',
     fontWeight: '600',
     color: '#ffffff',
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#1e40af',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '6px',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 2px 4px rgba(59, 130, 246, 0.1)',
+    transition: 'background-color 0.15s ease-in-out',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
     '&:hover': {
-      backgroundColor: '#2563eb',
-      transform: 'translateY(-1px)',
-      boxShadow: '0 4px 6px rgba(59, 130, 246, 0.2)'
-    },
-    '&:active': {
-      transform: 'translateY(0)',
-      boxShadow: '0 1px 2px rgba(59, 130, 246, 0.2)'
+      backgroundColor: '#1d4ed8'
     }
   },
   buttonDisabled: {
-    backgroundColor: '#93c5fd',
+    backgroundColor: '#9ca3af',
     cursor: 'not-allowed',
     '&:hover': {
-      transform: 'none',
-      boxShadow: 'none'
+      backgroundColor: '#9ca3af'
     }
   },
   spinner: {
-    display: 'inline-block',
-    width: '1rem',
-    height: '1rem',
+    width: '16px',
+    height: '16px',
     border: '2px solid #ffffff',
-    borderRightColor: 'transparent',
+    borderTopColor: 'transparent',
     borderRadius: '50%',
-    animation: 'spin 0.75s linear infinite',
-    marginRight: '0.5rem'
+    animation: 'spin 0.8s linear infinite'
+  },
+  divider: {
+    position: 'relative',
+    textAlign: 'center',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: 0,
+      right: 0,
+      height: '1px',
+      backgroundColor: '#e5e7eb'
+    }
+  },
+  dividerText: {
+    backgroundColor: '#ffffff',
+    color: '#6b7280',
+    fontSize: '0.875rem',
+    padding: '0 1rem'
+  },
+  socialButton: {
+    width: '100%',
+    padding: '0.75rem',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    color: '#374151',
+    backgroundColor: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    transition: 'all 0.15s ease-in-out',
+    '&:hover': {
+      backgroundColor: '#f9fafb',
+      borderColor: '#9ca3af'
+    }
+  },
+  facebookButton: {
+    '&:hover': {
+      backgroundColor: '#f0f9ff',
+      borderColor: '#60a5fa'
+    }
+  },
+  googleIcon: {
+    fontWeight: 'bold',
+    fontSize: '1rem',
+    color: '#ea4335'
+  },
+  facebookIcon: {
+    fontWeight: 'bold',
+    fontSize: '1.1rem',
+    color: '#1877f2'
   },
   loginPrompt: {
     textAlign: 'center',
-    marginTop: '1rem',
     fontSize: '0.875rem',
-    color: '#64748b'
+    color: '#6b7280'
   },
-  link: {
+  loginLink: {
     color: '#3b82f6',
     textDecoration: 'none',
     fontWeight: '500',
     '&:hover': {
       textDecoration: 'underline'
     }
-  },
-  welcomeSection: {
-    textAlign: 'center'
-  },
-  welcomeTitle: {
-    fontSize: '1.5rem',
-    fontWeight: '700',
-    marginBottom: '1rem'
-  },
-  welcomeText: {
-    fontSize: '1rem',
-    marginBottom: '2rem',
-    lineHeight: '1.6'
-  },
-  features: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem'
-  },
-  feature: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '0.8rem',
-    background: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: '12px'
-  },
-  featureIcon: {
-    fontSize: '1.5rem'
-  },
-  featureText: {
-    fontSize: '1rem',
-    margin: 0
   }
 };
 
-// Add keyframes for spinner animation
+// Add CSS animations
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   @keyframes spin {
@@ -649,29 +634,16 @@ styleSheet.textContent = `
     100% { transform: rotate(360deg); }
   }
 
-  @media (max-width: 1024px) {
-    .formWrapper {
-      flex-direction: column;
-    }
-    .rightColumn {
-      width: 100%;
-      padding: 1.5rem;
-    }
-    .leftColumn {
-      padding: 1.5rem;
-      border-right: none;
-      border-bottom: 1px solid #e9ecef;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .formRow {
-      flex-direction: column;
-    }
-    .formGroup {
-      min-width: 100%;
-    }
+  @media (max-width: 1200px) {
     .container {
+      flex-direction: column;
+    }
+    .sidePanel {
+      display: none;
+    }
+    .centerPanel {
+      flex: 1;
+      width: 100%;
       padding: 1rem;
     }
   }
