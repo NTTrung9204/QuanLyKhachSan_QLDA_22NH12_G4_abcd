@@ -11,6 +11,7 @@ import FacilityManagePage from '../pages/admin/FacilityManagePage';
 import RoomTypeManagePage from '../pages/admin/RoomTypeManagePage';
 import RoomManagePage from '../pages/admin/RoomManagePage';
 import BookingManagePage from '../pages/staff/BookingManagePage';
+import ProfileViewPage from '../pages/customer/ProfileViewPage';
 
 const AppRoutes = () => {
     return (
@@ -67,7 +68,7 @@ const AppRoutes = () => {
                         <Routes>
                             <Route path="/" element={<div>Customer Dashboard</div>} />
                             <Route path="bookings" element={<div>My Bookings</div>} />
-                            <Route path="profile" element={<div>My Profile</div>} />
+                            <Route path="profile" element={<ProfileViewPage />} />
                         </Routes>
                     </PrivateRoute>
                 } 
