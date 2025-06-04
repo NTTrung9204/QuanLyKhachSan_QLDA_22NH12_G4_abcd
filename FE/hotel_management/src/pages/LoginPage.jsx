@@ -34,9 +34,6 @@ const LoginPage = () => {
       const response = await api.post('/api/auth/login', formData);
       const userData = response.data;
 
-    //   console.log('token:', userData.token);
-    //   console.log('Login successful:', userData.data.user.role);   
-      
       // Lưu token và thông tin user vào localStorage
       localStorage.setItem('token', userData.token);
       localStorage.setItem('user', JSON.stringify(userData.data.user));
@@ -68,102 +65,127 @@ const LoginPage = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+    console.log('Continue with Google');
+  };
+
+  const handleFacebookLogin = () => {
+    console.log('Continue with Facebook');
+  };
+
   return (
     <div style={styles.container}>
-      <div style={styles.formWrapper}>
-        <div style={styles.leftColumn}>
-          <div style={styles.formHeader}>
-            <h2 style={styles.heading}>Đăng nhập</h2>
-            <p style={styles.subheading}>Vui lòng đăng nhập để tiếp tục</p>
+      <div style={styles.sidePanel}>
+        <div style={styles.imageContainer}>
+          <img 
+            src="https://images.unsplash.com/photo-1564501049412-61c2a3083791"
+            alt="Hotel lobby view"
+            style={styles.backgroundImage}
+          />
+          <div style={styles.overlay}></div>
+        </div>
+      </div>
+
+      <div style={styles.centerPanel}>
+        <div style={styles.formContainer}>
+          <div style={styles.logoContainer}>
+            <div style={styles.logo}>
+              <div style={styles.logoIcon}></div>
+            </div>
+          </div>
+
+          <div style={styles.header}>
+            <h2 style={styles.title}>Chào mừng trở lại!</h2>
+            <p style={styles.subtitle}>
+              Đăng nhập để trải nghiệm dịch vụ đặt phòng trực tuyến và nhiều tiện ích khác
+            </p>
           </div>
 
           {error && (
-            <div style={styles.alertDanger}>
-              <i style={styles.icon}>⚠️</i> {error}
+            <div style={styles.alert}>
+              <span style={styles.alertIcon}>⚠️</span>
+              {error}
             </div>
           )}
 
           {success && (
-            <div style={styles.alertSuccess}>
-              <i style={styles.icon}>✓</i> {success}
+            <div style={styles.successAlert}>
+              <span style={styles.alertIcon}>✓</span>
+              {success}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={styles.form}>
+          <form style={styles.form} onSubmit={handleSubmit}>
             <div style={styles.formSection}>
-              <div style={styles.formGroup}>
-                <label style={styles.formLabel} htmlFor="username">
-                  Tên đăng nhập <span style={styles.requiredMark}>*</span>
-                </label>
+              <h4 style={styles.sectionTitle}>Thông tin đăng nhập</h4>
+              
+              <div style={styles.inputGroup}>
                 <input
-                  style={styles.formInput}
+                  style={styles.input}
                   type="text"
-                  id="username"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
+                  placeholder="Tên đăng nhập"
                   required
-                  placeholder="Nhập tên đăng nhập"
                 />
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.formLabel} htmlFor="password">
-                  Mật khẩu <span style={styles.requiredMark}>*</span>
-                </label>
+              <div style={styles.inputGroup}>
                 <input
-                  style={styles.formInput}
+                  style={styles.input}
                   type="password"
-                  id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
+                  placeholder="Mật khẩu"
                   required
-                  placeholder="Nhập mật khẩu"
                 />
               </div>
             </div>
 
             <button 
               type="submit" 
-              style={loading ? {...styles.button, ...styles.buttonDisabled} : styles.button}
+              style={loading ? {...styles.loginButton, ...styles.buttonDisabled} : styles.loginButton}
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <span style={styles.spinner} role="status" aria-hidden="true"></span>
+                  <span style={styles.spinner}></span>
                   Đang xử lý...
                 </>
               ) : 'Đăng nhập'}
             </button>
 
+            <div style={styles.divider}>
+              <span style={styles.dividerText}>hoặc</span>
+            </div>
+
+            <button 
+              type="button"
+              style={styles.socialButton}
+              onClick={handleGoogleLogin}
+            >
+              <span style={styles.googleIcon}>G</span>
+              Tiếp tục với Google
+            </button>
+
             <div style={styles.registerPrompt}>
-              <p>Chưa có tài khoản? <Link to="/register" style={styles.link}>Đăng ký ngay</Link></p>
+              <p>Chưa có tài khoản? <Link to="/register" style={styles.registerLink}>Đăng ký ngay</Link></p>
             </div>
           </form>
-        </div>
 
-        <div style={styles.rightColumn}>
-          <div style={styles.welcomeSection}>
-            <h3 style={styles.welcomeTitle}>Chào mừng trở lại!</h3>
-            <p style={styles.welcomeText}>
-              Đăng nhập để trải nghiệm dịch vụ đặt phòng trực tuyến và nhiều tiện ích khác.
-            </p>
-            <div style={styles.features}>
-              <div style={styles.feature}>
-                <span style={styles.featureIcon}>🏨</span>
-                <p style={styles.featureText}>Đặt phòng dễ dàng</p>
-              </div>
-              <div style={styles.feature}>
-                <span style={styles.featureIcon}>💰</span>
-                <p style={styles.featureText}>Giá ưu đãi độc quyền</p>
-              </div>
-              <div style={styles.feature}>
-                <span style={styles.featureIcon}>🎁</span>
-                <p style={styles.featureText}>Tích điểm đổi quà</p>
-              </div>
-            </div>
-          </div>
+        </div>
+      </div>
+
+      <div style={styles.sidePanel}>
+        <div style={styles.imageContainer}>
+          <img 
+            src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b"
+            alt="Hotel room view"
+            style={styles.backgroundImage}
+          />
+          <div style={styles.overlay}></div>
         </div>
       </div>
     </div>
@@ -173,113 +195,150 @@ const LoginPage = () => {
 const styles = {
   container: {
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #f6f8fc 0%, #e9ecef 100%)',
-    padding: '2rem'
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
-  formWrapper: {
-    display: 'flex',
-    width: '100%',
-    maxWidth: '1000px',
-    background: '#ffffff',
-    borderRadius: '20px',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-    overflow: 'hidden'
-  },
-  leftColumn: {
+  sidePanel: {
     flex: '1',
-    padding: '1.5rem',
-    minWidth: 0,
-    maxWidth: '100%'
+    position: 'relative',
+    minHeight: '100vh'
   },
-  rightColumn: {
-    width: '400px',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-    padding: '2rem',
-    color: '#ffffff',
+  centerPanel: {
+    flex: '0 0 480px',
+    backgroundColor: '#ffffff',
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '2rem',
+    boxShadow: '0 0 20px rgba(0,0,0,0.1)'
+  },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: '100%'
+  },
+  backgroundImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover'
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(147, 51, 234, 0.3) 100%)'
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: '400px'
+  },
+  logoContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '2rem'
+  },
+  logo: {
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'center'
   },
-  formHeader: {
-    marginBottom: '1.5rem',
-    textAlign: 'center'
+  logoIcon: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    position: 'relative',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '20px',
+      height: '20px',
+      backgroundColor: '#ffffff',
+      borderRadius: '50%'
+    }
   },
-  heading: {
-    fontSize: '1.8rem',
+  header: {
+    textAlign: 'center',
+    marginBottom: '2rem'
+  },
+  title: {
+    fontSize: '1.75rem',
     fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: '0.3rem',
-    textAlign: 'center'
+    color: '#1f2937',
+    marginBottom: '0.5rem'
   },
-  subheading: {
-    fontSize: '1rem',
-    color: '#64748b',
-    textAlign: 'center'
+  subtitle: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    lineHeight: '1.4'
   },
-  alertDanger: {
-    backgroundColor: '#fee2e2',
-    color: '#991b1b',
-    padding: '1rem',
-    marginBottom: '1.5rem',
-    borderRadius: '8px',
+  alert: {
+    backgroundColor: '#fef2f2',
+    border: '1px solid #fecaca',
+    color: '#dc2626',
+    padding: '0.75rem',
+    borderRadius: '6px',
+    marginBottom: '1rem',
+    fontSize: '0.875rem',
     display: 'flex',
     alignItems: 'center'
   },
-  icon: {
+  successAlert: {
+    backgroundColor: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    color: '#166534',
+    padding: '0.75rem',
+    borderRadius: '6px',
+    marginBottom: '1rem',
+    fontSize: '0.875rem',
+    display: 'flex',
+    alignItems: 'center'
+  },
+  alertIcon: {
     marginRight: '0.5rem'
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem',
-    width: '100%'
+    gap: '1.5rem'
   },
   formSection: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.8rem',
+    gap: '1rem',
     padding: '1.5rem',
     backgroundColor: '#f8fafc',
     borderRadius: '12px',
-    marginBottom: '1rem',
-    border: '1px solid #e2e8f0',
-    width: '100%',
-    boxSizing: 'border-box'
+    border: '1px solid #e2e8f0'
   },
-  formGroup: {
-    flex: '1',
-    minWidth: '250px',
-    maxWidth: '100%',
-    marginBottom: '0.8rem',
-    position: 'relative'
-  },
-  formLabel: {
-    display: 'block',
-    marginBottom: '0.4rem',
-    fontSize: '0.95rem',
+  sectionTitle: {
+    fontSize: '1rem',
     fontWeight: '600',
-    color: '#334155',
-    textAlign: 'left',
-    letterSpacing: '0.3px'
+    color: '#374151',
+    marginBottom: '0.5rem',
+    paddingBottom: '0.5rem',
+    borderBottom: '1px solid #e5e7eb'
   },
-  requiredMark: {
-    color: '#dc2626',
-    marginLeft: '3px',
-    fontSize: '1rem'
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'column'
   },
-  formInput: {
+  input: {
     width: '100%',
-    padding: '0.6rem 0.8rem',
-    fontSize: '0.95rem',
-    backgroundColor: '#fff',
-    color: '#1e293b',
+    padding: '0.75rem',
+    fontSize: '0.875rem',
     border: '2px solid #e2e8f0',
     borderRadius: '8px',
-    transition: 'all 0.2s ease',
     outline: 'none',
+    transition: 'all 0.2s ease',
+    backgroundColor: '#ffffff',
     boxSizing: 'border-box',
     boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
     '&:hover': {
@@ -290,57 +349,109 @@ const styles = {
       boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
     },
     '&::placeholder': {
-      color: '#94a3b8',
-      fontSize: '0.9rem'
+      color: '#9ca3af'
     }
   },
-  button: {
+  loginButton: {
     width: '100%',
     padding: '0.8rem',
     fontSize: '1rem',
     fontWeight: '600',
     color: '#ffffff',
-    backgroundColor: '#3b82f6',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    boxShadow: '0 2px 4px rgba(59, 130, 246, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    boxShadow: '0 4px 6px rgba(59, 130, 246, 0.2)',
     '&:hover': {
-      backgroundColor: '#2563eb',
       transform: 'translateY(-1px)',
-      boxShadow: '0 4px 6px rgba(59, 130, 246, 0.2)'
-    },
-    '&:active': {
-      transform: 'translateY(0)',
-      boxShadow: '0 1px 2px rgba(59, 130, 246, 0.2)'
+      boxShadow: '0 6px 8px rgba(59, 130, 246, 0.3)'
     }
   },
   buttonDisabled: {
-    backgroundColor: '#93c5fd',
+    background: '#9ca3af',
     cursor: 'not-allowed',
     '&:hover': {
       transform: 'none',
-      boxShadow: 'none'
+      boxShadow: '0 4px 6px rgba(156, 163, 175, 0.2)'
     }
   },
   spinner: {
-    display: 'inline-block',
-    width: '1rem',
-    height: '1rem',
+    width: '16px',
+    height: '16px',
     border: '2px solid #ffffff',
-    borderRightColor: 'transparent',
+    borderTopColor: 'transparent',
     borderRadius: '50%',
-    animation: 'spin 0.75s linear infinite',
-    marginRight: '0.5rem'
+    animation: 'spin 0.8s linear infinite'
+  },
+  divider: {
+    position: 'relative',
+    textAlign: 'center',
+    margin: '1rem 0',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '50%',
+      left: 0,
+      right: 0,
+      height: '1px',
+      backgroundColor: '#e5e7eb'
+    }
+  },
+  dividerText: {
+    backgroundColor: '#ffffff',
+    color: '#6b7280',
+    fontSize: '0.875rem',
+    padding: '0 1rem'
+  },
+  socialButton: {
+    width: '100%',
+    padding: '0.75rem',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    color: '#374151',
+    backgroundColor: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    transition: 'all 0.15s ease-in-out',
+    '&:hover': {
+      backgroundColor: '#f9fafb',
+      borderColor: '#9ca3af'
+    }
+  },
+  facebookButton: {
+    '&:hover': {
+      backgroundColor: '#f0f9ff',
+      borderColor: '#60a5fa'
+    }
+  },
+  googleIcon: {
+    fontWeight: 'bold',
+    fontSize: '1rem',
+    color: '#ea4335'
+  },
+  facebookIcon: {
+    fontWeight: 'bold',
+    fontSize: '1.1rem',
+    color: '#1877f2'
   },
   registerPrompt: {
     textAlign: 'center',
-    marginTop: '1rem',
     fontSize: '0.875rem',
-    color: '#64748b'
+    color: '#6b7280',
+    marginTop: '1rem'
   },
-  link: {
+  registerLink: {
     color: '#3b82f6',
     textDecoration: 'none',
     fontWeight: '500',
@@ -348,51 +459,36 @@ const styles = {
       textDecoration: 'underline'
     }
   },
-  welcomeSection: {
-    textAlign: 'center'
-  },
-  welcomeTitle: {
-    fontSize: '1.5rem',
-    fontWeight: '700',
-    marginBottom: '1rem'
-  },
-  welcomeText: {
-    fontSize: '1rem',
-    marginBottom: '2rem',
-    lineHeight: '1.6'
-  },
   features: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem'
+    gap: '0.75rem',
+    marginTop: '2rem',
+    padding: '1.5rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '12px',
+    border: '1px solid #e2e8f0'
   },
   feature: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
-    padding: '0.8rem',
-    background: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: '12px'
+    gap: '0.75rem',
+    padding: '0.5rem',
+    background: 'rgba(59, 130, 246, 0.05)',
+    borderRadius: '8px'
   },
   featureIcon: {
-    fontSize: '1.5rem'
+    fontSize: '1.25rem'
   },
   featureText: {
-    fontSize: '1rem',
-    margin: 0
-  },
-  alertSuccess: {
-    backgroundColor: '#dcfce7',
-    color: '#166534',
-    padding: '1rem',
-    marginBottom: '1.5rem',
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center'
+    fontSize: '0.875rem',
+    margin: 0,
+    color: '#374151',
+    fontWeight: '500'
   }
 };
 
-// Add keyframes for spinner animation
+// Add CSS animations
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   @keyframes spin {
@@ -400,30 +496,26 @@ styleSheet.textContent = `
     100% { transform: rotate(360deg); }
   }
 
-  @media (max-width: 1024px) {
-    .formWrapper {
+  @media (max-width: 1200px) {
+    .container {
       flex-direction: column;
     }
-    .rightColumn {
-      width: 100%;
-      padding: 1.5rem;
+    .sidePanel {
+      display: none;
     }
-    .leftColumn {
-      padding: 1.5rem;
-      border-right: none;
-      border-bottom: 1px solid #e9ecef;
+    .centerPanel {
+      flex: 1;
+      width: 100%;
+      padding: 1rem;
     }
   }
 
   @media (max-width: 640px) {
-    .formRow {
-      flex-direction: column;
-    }
-    .formGroup {
-      min-width: 100%;
-    }
-    .container {
+    .centerPanel {
       padding: 1rem;
+    }
+    .formContainer {
+      max-width: 100%;
     }
   }
 `;
