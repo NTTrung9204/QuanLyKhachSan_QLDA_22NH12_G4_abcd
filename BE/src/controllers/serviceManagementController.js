@@ -57,3 +57,49 @@ exports.removeServiceFromBooking = catchAsync(async (req, res, next) => {
     }
   });
 }); 
+
+/**
+ * Remove a service from a specific room in a booking
+ */
+exports.removeRoomServiceFromBooking = catchAsync(async (req, res, next) => {
+  const { bookingId, roomIndex, serviceId, quantity } = req.body;
+
+  // Validate required fields
+  if (!bookingId || roomIndex === undefined || !serviceId) {
+    return next(
+      new AppError(
+        'Missing required fields: bookingId, roomIndex, serviceId',
+        400
+      )
+    );
+  }
+
+  // Validate roomIndex is a number
+  if (isNaN(parseInt(roomIndex))) {
+    return next(new AppError('roomIndex must be a number', 400));
+  }
+
+  // Convert quantity to number if provided
+  let quantityToRemove = null;
+  if (quantity !== undefined) {
+    quantityToRemove = parseInt(quantity);
+    if (isNaN(quantityToRemove)) {
+      return next(new AppError('quantity must be a number', 400));
+    }
+  }
+
+  const booking = await serviceManagementService.removeRoomServiceFromBooking(
+    bookingId,
+    parseInt(roomIndex),
+    serviceId,
+    quantityToRemove
+  );
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Service removed successfully from the booking',
+    data: {
+      booking,
+    },
+  });
+});

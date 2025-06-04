@@ -11,4 +11,7 @@ router.use(restrictTo('staff', 'admin'));
 // Add service to a booking room
 router.post('/booking/add-service', serviceManagementController.addServiceToBooking);
 
+// Remove service from a specific room in a booking
+router.patch('/booking/remove-service', serviceManagementController.removeRoomServiceFromBooking);
+
 module.exports = router; 
