@@ -14,6 +14,14 @@ exports.getUserById = async (userId) => {
   return user;
 };
 
+exports.getUserByCccd = async (cccd) => {
+  const user = await User.findOne({ 'profile.cccd': cccd });
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+  return user;
+}
+
 /**
  * Get user profile by ID
  * @param {string} userId - User ID

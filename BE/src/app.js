@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
 const { AppError, globalErrorHandler } = require('./utils/errorHandler');
 
 // Load environment variables
@@ -17,6 +18,14 @@ const routes = require('./routes');
 
 // Initialize Express app
 const app = express();
+
+// Cấu hình CORS
+app.use(cors({
+  origin: 'http://localhost:5172', // frontend React
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
 // Middleware
 app.use(express.json()); // Body parser for JSON data

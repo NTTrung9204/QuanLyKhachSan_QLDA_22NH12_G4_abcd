@@ -11,4 +11,7 @@ router.use(authMiddleware.protect);
 router.get('/profile', userController.getMyProfile);
 router.patch('/profile', userController.updateMyProfile);
 
+router.use(authMiddleware.restrictTo('staff', 'admin'));
+router.get('/profile/:cccd', userController.getUserProfile);
+
 module.exports = router; 
