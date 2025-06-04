@@ -9,6 +9,9 @@ router.use(authMiddleware.protect);
 
 // Routes for all authenticated users (customer, staff, admin)
 router.get('/', bookingController.getAllBookings);
+
+router.get('/date-range', bookingController.getBookingsByDateRange);
+
 router.get('/:id', bookingController.getBooking);
 router.post('/', bookingController.createBooking);
 
