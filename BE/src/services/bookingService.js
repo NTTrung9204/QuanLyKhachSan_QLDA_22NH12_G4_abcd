@@ -636,22 +636,20 @@ exports.getBookingsByCustomerCCCD = async (cccd, currentUser) => {
 
   // Find all bookings for this customer
   const bookings = await Booking.find({ customerId: customer._id })
-    .populate({
-      path: 'customerId',
-      select: 'profile.fullName profile.email profile.phone profile.cccd',
-    })
-    .populate({
-      path: 'staffId',
-      select: 'profile.fullName',
-    })
+    .populate('customerId', 'name email phone')
+    .populate('staffId', 'name')
     .populate({
       path: 'rooms.roomId',
+      select: 'name roomTypeId',
       populate: {
         path: 'roomTypeId',
-        select: 'name pricePerNight',
-      },
+        select: 'name pricePerNight'
+      }
     })
-    .populate('services.serviceId')
+    .populate({
+      path: 'services.serviceId',
+      select: 'name price'
+    })
     .sort({ createdAt: -1 });
 
   return bookings;
@@ -704,22 +702,20 @@ exports.getBookingsByDateRange = async (startDate, endDate, currentUser) => {
   }
 
   const bookings = await Booking.find(query)
-    .populate({
-      path: 'customerId',
-      select: 'profile.fullName profile.email profile.phone profile.cccd',
-    })
-    .populate({
-      path: 'staffId',
-      select: 'profile.fullName',
-    })
+    .populate('customerId', 'name email phone')
+    .populate('staffId', 'name')
     .populate({
       path: 'rooms.roomId',
+      select: 'name roomTypeId',
       populate: {
         path: 'roomTypeId',
-        select: 'name pricePerNight',
-      },
+        select: 'name pricePerNight'
+      }
     })
-    .populate('services.serviceId')
+    .populate({
+      path: 'services.serviceId',
+      select: 'name price'
+    })
     .sort({ createdAt: -1 });
 
   return bookings;
