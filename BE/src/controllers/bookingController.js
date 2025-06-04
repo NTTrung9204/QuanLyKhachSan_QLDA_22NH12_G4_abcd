@@ -101,3 +101,39 @@ exports.getBookingsByDateRange = catchAsync(async (req, res, next) => {
   const bookings = await bookingService.getBookingsByDateRange(checkIn, checkOut, req.user);
   ResponseHandler.success(res, 200, bookings, 'Bookings within date range retrieved successfully');
 });
+
+/**
+ * Update booking status
+ * Admin/staff can update any booking status, customers have limited permissions
+ */
+exports.updateBookingStatus = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return next(new AppError('Status is required', 400));
+  }
+
+  const booking = await bookingService.updateBookingStatus(
+    id,
+    status,
+    req.user
+  );
+
+  let message = 'Booking status updated successfully';
+
+  // Provide more specific message based on the status
+  switch (status) {
+    case 'checked_in':
+      message = 'Booking checked in successfully';
+      break;
+    case 'checked_out':
+      message = 'Booking checked out successfully';
+      break;
+    case 'cancelled':
+      message = 'Booking cancelled successfully';
+      break;
+  }
+
+  ResponseHandler.success(res, 200, booking, message);
+});

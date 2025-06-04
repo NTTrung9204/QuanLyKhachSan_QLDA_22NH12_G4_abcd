@@ -19,6 +19,7 @@ router.post('/', bookingController.createBooking);
 router.patch('/:id', bookingController.updateBooking);
 router.delete('/:id', bookingController.deleteBooking);
 router.patch('/:id/cancel', bookingController.cancelBooking);
+router.patch('/:id/status', bookingController.updateBookingStatus);
 
 // Routes for staff and admin only
 router.use(authMiddleware.restrictTo('staff', 'admin'));

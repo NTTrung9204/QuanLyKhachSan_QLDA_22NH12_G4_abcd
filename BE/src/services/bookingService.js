@@ -720,3 +720,113 @@ exports.getBookingsByDateRange = async (startDate, endDate, currentUser) => {
 
   return bookings;
 };
+
+/**
+ * Update booking status
+ * Admin/staff can update any booking status, customers have limited permissions
+ */
+exports.updateBookingStatus = async (bookingId, status, currentUser) => {
+  // Find the booking
+  const booking = await Booking.findById(bookingId);
+
+  if (!booking) {
+    throw new AppError('No booking found with that ID', 404);
+  }
+
+  // Check user permissions
+  if (currentUser.role === 'customer') {
+    // Customers can only update their own bookings
+    if (booking.customerId.toString() !== currentUser._id.toString()) {
+      throw new AppError(
+        'You do not have permission to update this booking',
+        403
+      );
+    }
+
+    // Customers can only cancel bookings that are in pending status
+    if (status !== 'cancelled' || booking.status !== 'pending') {
+      throw new AppError('Customers can only cancel pending bookings', 403);
+    }
+  }
+
+  // Validate the status value
+  const validStatuses = ['pending', 'checked_in', 'checked_out', 'cancelled'];
+  if (!validStatuses.includes(status)) {
+    throw new AppError(
+      `Invalid status value. Must be one of: ${validStatuses.join(', ')}`,
+      400
+    );
+  }
+
+  // Apply status transition rules
+  if (booking.status === status) {
+    throw new AppError(`Booking is already in ${status} status`, 400);
+  }
+
+  // Handle specific status transition rules
+  switch (status) {
+    case 'checked_in':
+      if (booking.status !== 'pending') {
+        throw new AppError(
+          `Cannot check in a booking with status: ${booking.status}`,
+          400
+        );
+      }
+      break;
+    case 'checked_out':
+      if (booking.status !== 'checked_in') {
+        throw new AppError(
+          'Can only check out a booking that is checked in',
+          400
+        );
+      }
+      break;
+    case 'pending':
+      if (booking.status === 'checked_out' || booking.status === 'cancelled') {
+        throw new AppError(
+          `Cannot change a ${booking.status} booking back to pending`,
+          400
+        );
+      }
+      break;
+    case 'cancelled':
+      if (booking.status === 'checked_out') {
+        throw new AppError(
+          'Cannot cancel a booking that is already checked out',
+          400
+        );
+      }
+      break;
+  }
+
+  // Update booking status
+  booking.status = status;
+
+  // If staff/admin checking in/out, record the staff ID
+  if (
+    (status === 'checked_in' || status === 'checked_out') &&
+    (currentUser.role === 'staff' || currentUser.role === 'admin')
+  ) {
+    booking.staffId = currentUser._id;
+  }
+
+  // Save the updated booking
+  await booking.save();
+
+  // Return the updated booking with populated fields
+  return await Booking.findById(bookingId)
+    .populate('customerId', 'name email phone')
+    .populate('staffId', 'name')
+    .populate({
+      path: 'rooms.roomId',
+      select: 'name roomTypeId',
+      populate: {
+        path: 'roomTypeId',
+        select: 'name pricePerNight'
+      }
+    })
+    .populate({
+      path: 'services.serviceId',
+      select: 'name price'
+    });
+};
