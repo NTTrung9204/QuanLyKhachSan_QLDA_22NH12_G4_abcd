@@ -72,4 +72,22 @@ exports.checkOut = catchAsync(async (req, res, next) => {
 exports.cancelBooking = catchAsync(async (req, res, next) => {
   const booking = await bookingService.cancelBooking(req.params.id, req.user);
   ResponseHandler.success(res, 200, booking, 'Booking cancelled successfully');
-}); 
+});
+
+/**
+ * Get bookings by customer CCCD
+ * Only staff and admin can access this feature
+ */
+exports.getBookingsByCustomerCCCD = catchAsync(async (req, res, next) => {
+  const { cccd } = req.params;
+  const bookings = await bookingService.getBookingsByCustomerCCCD(
+    cccd,
+    req.user
+  );
+  ResponseHandler.success(
+    res,
+    200,
+    bookings,
+    'Bookings retrieved successfully'
+  );
+});
