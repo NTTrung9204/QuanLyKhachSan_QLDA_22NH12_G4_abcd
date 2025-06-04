@@ -656,3 +656,71 @@ exports.getBookingsByCustomerCCCD = async (cccd, currentUser) => {
 
   return bookings;
 };
+
+/**
+ * Get bookings by date range
+ * Staff/admin can see all bookings within a date range, customers can only see their own bookings
+ */
+exports.getBookingsByDateRange = async (startDate, endDate, currentUser) => {
+  // Validate date parameters
+  if (!startDate || !endDate) {
+    throw new AppError('Both start date and end date are required', 400);
+  }
+
+  // Convert to Date objects
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Validate if dates are valid
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    throw new AppError('Invalid date format. Please use YYYY-MM-DD format', 400);
+  }
+
+  // Validate date range
+  if (start > end) {
+    throw new AppError('Start date must be before or equal to end date', 400);
+  }
+
+  let query = {
+    // Look for bookings where at least one room has:
+    // - Check-in date within the specified range OR
+    // - Check-out date within the specified range OR
+    // - Check-in before start date and check-out after end date (spanning the entire range)
+    $or: [
+      { 'rooms.checkIn': { $gte: start, $lte: end } },
+      { 'rooms.checkOut': { $gte: start, $lte: end } },
+      {
+        $and: [
+          { 'rooms.checkIn': { $lte: start } },
+          { 'rooms.checkOut': { $gte: end } },
+        ],
+      },
+    ],
+  };
+
+  // If user is not admin/staff, restrict to their own bookings
+  if (currentUser.role !== 'admin' && currentUser.role !== 'staff') {
+    query.customerId = currentUser._id;
+  }
+
+  const bookings = await Booking.find(query)
+    .populate({
+      path: 'customerId',
+      select: 'profile.fullName profile.email profile.phone profile.cccd',
+    })
+    .populate({
+      path: 'staffId',
+      select: 'profile.fullName',
+    })
+    .populate({
+      path: 'rooms.roomId',
+      populate: {
+        path: 'roomTypeId',
+        select: 'name pricePerNight',
+      },
+    })
+    .populate('services.serviceId')
+    .sort({ createdAt: -1 });
+
+  return bookings;
+};
