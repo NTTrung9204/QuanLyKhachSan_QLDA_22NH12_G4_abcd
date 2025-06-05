@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import HotelToolbar from '../components/HotelToolbar';
+import HotelIntroSection from '../components/HotelIntroSection';
 
 // Cập nhật API endpoint với port 3000
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -153,31 +154,16 @@ const HotelSearchPage = () => {
   };
 
   const handleSearch = async () => {
-    // Validate dates
     if (!searchData.checkIn || !searchData.checkOut) {
-      setError('Vui lòng chọn ngày nhận và trả phòng');
+      alert('Vui lòng chọn ngày nhận và trả phòng');
       return;
     }
 
-    const checkIn = new Date(searchData.checkIn);
-    const checkOut = new Date(searchData.checkOut);
-
-    if (checkIn >= checkOut) {
-      setError('Ngày trả phòng phải sau ngày nhận phòng');
-      return;
-    }
-
-    if (checkIn < new Date()) {
-      setError('Ngày nhận phòng không thể là ngày trong quá khứ');
-      return;
-    }
+    setLoading(true);
+    setHasSearched(true);
+    setError(null);
 
     try {
-      setLoading(true);
-      setError(null);
-      setHasSearched(true);
-
-      // Construct search params
       const searchParams = new URLSearchParams({
         checkIn: searchData.checkIn,
         checkOut: searchData.checkOut,
@@ -185,54 +171,25 @@ const HotelSearchPage = () => {
         numChild: searchData.numChild
       });
 
-      console.log('Searching for available rooms with params:', searchParams.toString());
-      
+      console.log('Searching rooms with params:', searchParams.toString());
       const response = await fetch(`${API_BASE_URL}/rooms/available?${searchParams}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-
+      
       if (!response.ok) {
-        throw new Error(`Lỗi tìm kiếm: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Lỗi API (${response.status}): ${errorText}`);
       }
-
-      const data = await response.json();
-      console.log('Search results:', data);
-
-      // Transform the data to include images
-      const availableRooms = await Promise.all(
-        data.data.map(async (room) => {
-          let images = roomImages[room.roomTypeId] || [];
-          if (!images.length) {
-            try {
-              images = await fetchRoomTypeImages(room.roomTypeId);
-            } catch (err) {
-              console.error(`Error fetching images for room ${room.roomTypeId}:`, err);
-              images = [{
-                path: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500'
-              }];
-            }
-          }
-          return {
-            ...room,
-            images
-          };
-        })
-      );
-
-      setSearchResults({
-        checkIn: searchData.checkIn,
-        checkOut: searchData.checkOut,
-        totalRooms: data.data.length,
-        rooms: availableRooms
-      });
-
+      
+      const searchResults = await response.json();
+      console.log('Search results:', searchResults);
+      setSearchResults(searchResults);
     } catch (err) {
       console.error('Search error:', err);
-      setError(err.message);
-      setSearchResults(null);
+      setError(`Không thể tìm kiếm phòng: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -252,12 +209,6 @@ const HotelSearchPage = () => {
     const diffTime = Math.abs(checkOut - checkIn);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
-  };
-
-  const handleBookRoom = async (roomId) => {
-    // TODO: Implement booking functionality
-    console.log('Booking room:', roomId);
-    alert('Chức năng đặt phòng sẽ được cập nhật trong thời gian tới!');
   };
 
   return (
@@ -412,92 +363,82 @@ const HotelSearchPage = () => {
             </div>
           </div>
 
+          {/* Hotel Intro Section */}
+          {!hasSearched && <HotelIntroSection />}
+
           {/* Search Results */}
           {hasSearched && (
-            <div style={styles.searchResultsSection}>
+            <div style={styles.resultsSection}>
               <div style={styles.container}>
                 {loading ? (
                   <div style={styles.loadingContainer}>
                     <div style={styles.loadingSpinner}></div>
                     <p>Đang tìm kiếm phòng trống...</p>
                   </div>
-                ) : error ? (
-                  <div style={styles.errorContainer}>
-                    <p style={styles.errorMessage}>{error}</p>
-                    <button onClick={() => setError(null)} style={styles.retryButton}>
-                      Thử lại
-                    </button>
-                  </div>
                 ) : searchResults ? (
-                  <>
-                    <div style={styles.searchResultsHeader}>
-                      <h2 style={styles.searchResultsTitle}>
-                        Phòng trống ({searchResults.totalRooms})
+                  <div>
+                    <div style={styles.resultsHeader}>
+                      <h2 style={styles.resultsTitle}>
+                        Kết quả tìm kiếm ({searchResults.totalAvailableRooms} phòng trống)
                       </h2>
-                      <p style={styles.searchResultsInfo}>
-                        {new Date(searchResults.checkIn).toLocaleDateString('vi-VN')} - 
-                        {new Date(searchResults.checkOut).toLocaleDateString('vi-VN')} 
-                        ({calculateNights()} đêm) • 
-                        {searchData.numAdult} người lớn 
-                        {searchData.numChild > 0 ? ` • ${searchData.numChild} trẻ em` : ''}
+                      <p style={styles.resultsInfo}>
+                        {new Date(searchResults.checkIn).toLocaleDateString('vi-VN')} - {new Date(searchResults.checkOut).toLocaleDateString('vi-VN')} 
+                        ({calculateNights()} đêm) • {searchData.numAdult} người lớn {searchData.numChild > 0 && `• ${searchData.numChild} trẻ em`}
                       </p>
                     </div>
-
-                    <div style={styles.roomTypesGrid}>
-                      {searchResults.rooms.map((room) => (
-                        <div
-                          key={room._id}
-                          className="room-card"
-                          style={{
-                            ...styles.roomTypeCard,
-                            transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                            opacity: 0,
-                            transform: 'translateY(50px)',
-                          }}
-                        >
-                          <div style={styles.roomTypeImageContainer}>
+                    
+                    <div style={styles.roomGrid}>
+                      {searchResults.roomTypes.map(roomType => (
+                        <div key={roomType._id} style={styles.roomCard}>
+                          <div style={styles.roomImageContainer}>
                             <img
-                              src={room.images[0]?.path || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500'}
-                              alt={room.name}
-                              style={styles.roomTypeImage}
+                              src={roomType.imageIds[0]}
+                              alt={roomType.name}
+                              style={styles.roomImage}
                             />
-                            <div style={styles.roomAvailabilityBadge}>
-                              Còn trống
+                            <div style={styles.roomBadge}>
+                              {roomType.availableRooms.length} phòng trống
                             </div>
                           </div>
-                          <div style={styles.roomTypeContent}>
-                            <h3 style={styles.roomTypeName}>{room.name}</h3>
-                            <p style={styles.roomTypeDescription}>{room.description}</p>
-                            <div style={styles.roomTypePrice}>
-                              {formatPrice(room.pricePerNight)}/đêm
-                              <span style={styles.searchTotalPrice}>
-                                Tổng: {formatPrice(room.pricePerNight * calculateNights())}
-                              </span>
+                          
+                          <div style={styles.roomContent}>
+                            <div style={styles.roomHeader}>
+                              <h3 style={styles.roomName}>{roomType.name}</h3>
+                              <div style={styles.roomCapacity}>
+                                👥 Tối đa {roomType.maxAdult} người lớn, {roomType.maxChild} trẻ em
+                              </div>
                             </div>
-                            <div style={styles.roomTypeCapacity}>
-                              👥 Tối đa {room.maxAdult} người lớn • {room.maxChild} trẻ em
-                            </div>
-                            <div style={styles.roomTypeAmenities}>
-                              {room.amenities?.map((amenity, i) => (
-                                <span key={i} style={styles.amenityTag}>✓ {amenity}</span>
+                            
+                            <p style={styles.roomDescription}>{roomType.description}</p>
+                            
+                            <div style={styles.amenities}>
+                              {roomType.amenities.slice(0, 3).map((amenity, index) => (
+                                <span key={index} style={styles.amenityTag}>
+                                  ✓ {amenity}
+                                </span>
                               ))}
                             </div>
-                            <button 
-                              onClick={() => handleBookRoom(room._id)} 
-                              style={styles.searchBookButton}
-                            >
-                              Đặt phòng ngay
-                            </button>
+                            
+                            <div style={styles.roomFooter}>
+                              <div style={styles.priceSection}>
+                                <div style={styles.pricePerNight}>
+                                  {formatPrice(roomType.pricePerNight)}/đêm
+                                </div>
+                                <div style={styles.totalPrice}>
+                                  Tổng: {formatPrice(roomType.pricePerNight * calculateNights())}
+                                </div>
+                              </div>
+                              
+                              <button style={styles.bookButton}>
+                                Đặt ngay
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </>
-                ) : (
-                  <div style={styles.noResultsContainer}>
-                    <p>Không tìm thấy phòng phù hợp với tiêu chí của bạn</p>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           )}
@@ -1032,95 +973,6 @@ const styles = {
     gap: '0.5rem',
     marginTop: 'auto'
   },
-
-  searchResultsSection: {
-    padding: '4rem 2rem',
-    backgroundColor: '#f8fafc'
-  },
-
-  searchResultsHeader: {
-    marginBottom: '2rem',
-    textAlign: 'center'
-  },
-
-  searchResultsTitle: {
-    fontSize: '2rem',
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: '0.5rem'
-  },
-
-  searchResultsInfo: {
-    color: '#666',
-    fontSize: '1.1rem'
-  },
-
-  errorContainer: {
-    textAlign: 'center',
-    padding: '2rem',
-    backgroundColor: '#fee2e2',
-    borderRadius: '8px',
-    marginBottom: '2rem'
-  },
-
-  errorMessage: {
-    color: '#dc2626',
-    marginBottom: '1rem'
-  },
-
-  retryButton: {
-    backgroundColor: '#dc2626',
-    color: 'white',
-    padding: '0.5rem 1rem',
-    borderRadius: '6px',
-    border: 'none',
-    cursor: 'pointer',
-    '&:hover': {
-      backgroundColor: '#b91c1c'
-    }
-  },
-
-  noResultsContainer: {
-    textAlign: 'center',
-    padding: '4rem 2rem',
-    color: '#666'
-  },
-
-  roomAvailabilityBadge: {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    backgroundColor: '#059669',
-    color: 'white',
-    padding: '0.5rem 1rem',
-    borderRadius: '20px',
-    fontSize: '0.875rem',
-    fontWeight: '600'
-  },
-
-  searchTotalPrice: {
-    fontSize: '0.9rem',
-    color: '#666',
-    marginLeft: '0.5rem'
-  },
-
-  searchBookButton: {
-    backgroundColor: '#2563eb',
-    color: 'white',
-    padding: '0.75rem',
-    borderRadius: '8px',
-    border: 'none',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    width: '100%',
-    marginTop: '1rem',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: '#1d4ed8',
-      transform: 'translateY(-1px)'
-    }
-  }
 };
 
 // Update the styleSheet content
