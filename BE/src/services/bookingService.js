@@ -868,3 +868,36 @@ exports.getFuturePendingBookings = async () => {
     })
     .sort({ 'rooms.checkIn': 1 }); // Sort by check-in date ascending
 };
+
+/**
+ * Get all checked-in bookings
+ */
+exports.getCheckedInBookings = async () => {
+  const query = {
+    status: 'checked_in'
+  };
+
+  return await Booking.find(query)
+    .populate({
+      path: 'customerId',
+      select: 'profile',
+      populate: {
+        path: 'profile',
+        select: 'fullName cccd phone email address'
+      }
+    })
+    .populate('staffId', 'name')
+    .populate({
+      path: 'rooms.roomId',
+      select: 'name roomTypeId',
+      populate: {
+        path: 'roomTypeId',
+        select: 'name pricePerNight'
+      }
+    })
+    .populate({
+      path: 'services.serviceId',
+      select: 'name price'
+    })
+    .sort({ 'rooms.checkIn': -1 }); // Sort by check-in date descending
+};

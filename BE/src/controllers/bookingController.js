@@ -146,3 +146,11 @@ exports.getFuturePendingBookings = catchAsync(async (req, res, next) => {
   const bookings = await bookingService.getFuturePendingBookings(req.user);
   ResponseHandler.success(res, 200, bookings, 'Future pending bookings retrieved successfully');
 });
+
+/**
+ * Get all checked-in bookings
+ */
+exports.getCheckedInBookings = catchAsync(async (req, res, next) => {
+  const bookings = await bookingService.getCheckedInBookings();
+  ResponseHandler.success(res, 200, bookings, 'Checked-in bookings retrieved successfully');
+});

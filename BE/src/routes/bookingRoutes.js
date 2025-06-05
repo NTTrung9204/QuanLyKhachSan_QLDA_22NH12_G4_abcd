@@ -14,6 +14,8 @@ router.get('/date-range', bookingController.getBookingsByDateRange);
 
 router.get('/future-pending', bookingController.getFuturePendingBookings);
 
+router.get('/checked-in', bookingController.getCheckedInBookings);
+
 router.get('/:id', bookingController.getBooking);
 router.post('/', bookingController.createBooking);
 

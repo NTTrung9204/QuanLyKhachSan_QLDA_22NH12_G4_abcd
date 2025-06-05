@@ -17,6 +17,11 @@ const StaffNavigation = () => {
       icon: '📅',
       path: '/staff/check-in',
     },
+    {
+      text: 'Quản lý check-out',
+      icon: '🔑',
+      path: '/staff/check-out',
+    },
   ];
 
   const handleLogout = () => {
