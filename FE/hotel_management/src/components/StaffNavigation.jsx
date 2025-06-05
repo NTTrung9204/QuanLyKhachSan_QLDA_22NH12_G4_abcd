@@ -9,7 +9,7 @@ const StaffNavigation = () => {
 
   const menuItems = [
     {
-      text: 'Quản lý đặt phòng',
+      text: 'Đặt phòng',
       icon: '🏨',
       path: '/staff/bookings',
     },
@@ -23,6 +23,11 @@ const StaffNavigation = () => {
       icon: '🔑',
       path: '/staff/check-out',
     },
+    {
+      text: 'Quản lý dịch vụ',
+      icon: '🔍',
+      path: '/staff/services',
+    }
   ];
 
   const handleLogout = async () => {
