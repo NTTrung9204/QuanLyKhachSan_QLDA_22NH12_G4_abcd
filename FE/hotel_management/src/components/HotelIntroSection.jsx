@@ -211,18 +211,6 @@ const HotelIntroSection = () => {
                 }}>
                   Đặt Phòng Ngay →
                 </button>
-                <button style={{
-                  backgroundColor: 'transparent',
-                  color: 'white',
-                  padding: '1rem 2rem',
-                  borderRadius: '0.5rem',
-                  fontWeight: 500,
-                  transition: 'all 0.3s ease',
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  cursor: 'pointer'
-                }}>
-                  Xem Thư Viện Ảnh
-                </button>
               </div>
             </div>
           </div>
