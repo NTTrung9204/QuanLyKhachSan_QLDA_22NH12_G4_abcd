@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ImageUploadModal from '../../components/ImageUploadModal';
 import api from '../../api/axios';
+import BackToDashboard from '../../components/admin/BackToDashboard';
 
 const ImageManagePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -110,6 +111,7 @@ const ImageManagePage = () => {
 
   return (
     <div style={styles.container}>
+      <BackToDashboard />
       <div style={styles.header}>
         <h2 style={styles.title}>Quản lý hình ảnh</h2>
         <button 

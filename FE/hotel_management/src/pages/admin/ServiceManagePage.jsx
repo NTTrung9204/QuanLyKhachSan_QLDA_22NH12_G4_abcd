@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import api from '../../api/axios';
+import BackToDashboard from '../../components/admin/BackToDashboard';
 
 const ServiceManagePage = () => {
   const [services, setServices] = useState([]);
@@ -137,6 +138,7 @@ const ServiceManagePage = () => {
 
   return (
     <div className="service-page">
+      <BackToDashboard />
       <div className="service-header">
         <h2>Service Management</h2>
         <button className="add-button" onClick={showModal}>
@@ -272,7 +274,7 @@ const ServiceManagePage = () => {
           padding: 24px;
           max-width: 1200px;
           margin: 0 auto;
-          margin-top: 200px; /* Remove top margin to position at top */
+          margin-top: 20px; /* Reduced from 200px to 20px */
           margin-bottom: auto;
           background-color: #f5f6fa;
           border-radius: 12px;

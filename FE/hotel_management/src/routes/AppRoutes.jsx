@@ -17,6 +17,9 @@ import ServiceManagePage from '../pages/admin/ServiceManagePage';
 import CheckInManagePage from '../pages/staff/CheckInManagePage';
 import StaffLayout from '../layouts/StaffLayout';
 import CheckOutManagePage from '../pages/staff/CheckOutManagePage';
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
+import BookingServicePage from '../pages/staff/BookingServicePage';
+import StaffBookingListPage from '../pages/staff/StaffBookingListPage';
 
 const AppRoutes = () => {
     return (
@@ -41,7 +44,7 @@ const AppRoutes = () => {
                 element={
                     <PrivateRoute allowedRoles={['admin']}>
                         <Routes style={{backgroundColor : '#f8fafc', width : '100%'}}>
-                            <Route path="/" element={<div>Admin Dashboard</div>} />
+                            <Route path="/" element={<AdminDashboardPage />} />
                             <Route path="rooms" element={<RoomManagePage />} />
                             <Route path="services" element={<ServiceManagePage />} />
                             <Route path="images" element={<ImageManagePage />} />
@@ -63,6 +66,8 @@ const AppRoutes = () => {
                                 <Route path="bookings" element={<BookingManagePage />} />
                                 <Route path='check-in' element={<CheckInManagePage />} />
                                 <Route path='check-out' element={<CheckOutManagePage />} />
+                                <Route path="services" element={<StaffBookingListPage />} />
+                                <Route path="bookings/:bookingId/services" element={<BookingServicePage />} />
                             </Routes>
                         </StaffLayout>
                     </PrivateRoute>
