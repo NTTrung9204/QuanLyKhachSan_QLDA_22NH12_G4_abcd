@@ -15,7 +15,7 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   let user;
   try {
     user = JSON.parse(userStr);
-  } catch (error) {
+  } catch {
     // Nếu parse thất bại, đăng xuất user
     localStorage.removeItem('token');
     localStorage.removeItem('user');
