@@ -14,6 +14,8 @@ import BookingManagePage from '../pages/staff/BookingManagePage';
 import ProfileViewPage from '../pages/customer/ProfileViewPage';
 import ServiceManagePage from '../pages/admin/ServiceManagePage';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
+import BookingServicePage from '../pages/staff/BookingServicePage';
+import StaffBookingListPage from '../pages/staff/StaffBookingListPage';
 
 const AppRoutes = () => {
     return (
@@ -57,6 +59,8 @@ const AppRoutes = () => {
                         <Routes>
                             <Route path="/" element={<div>Staff Dashboard</div>} />
                             <Route path="bookings" element={<BookingManagePage />} />
+                            <Route path="services" element={<StaffBookingListPage />} />
+                            <Route path="bookings/:bookingId/services" element={<BookingServicePage />} />
                         </Routes>
                     </PrivateRoute>
                 } 
