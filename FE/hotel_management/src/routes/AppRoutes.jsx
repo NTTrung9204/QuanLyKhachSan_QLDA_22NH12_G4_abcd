@@ -12,6 +12,7 @@ import RoomTypeManagePage from '../pages/admin/RoomTypeManagePage';
 import RoomManagePage from '../pages/admin/RoomManagePage';
 import BookingManagePage from '../pages/staff/BookingManagePage';
 import ProfileViewPage from '../pages/customer/ProfileViewPage';
+import ServiceManagePage from '../pages/admin/ServiceManagePage';
 
 const AppRoutes = () => {
     return (
@@ -38,7 +39,7 @@ const AppRoutes = () => {
                         <Routes style={{backgroundColor : '#f8fafc', width : '100%'}}>
                             <Route path="/" element={<div>Admin Dashboard</div>} />
                             <Route path="rooms" element={<RoomManagePage />} />
-                            <Route path="services" element={<div>Service Management</div>} />
+                            <Route path="services" element={<ServiceManagePage />} />
                             <Route path="images" element={<ImageManagePage />} />
                             <Route path="facilities" element={<FacilityManagePage />} />
                             <Route path="type-rooms" element={<RoomTypeManagePage />} />
