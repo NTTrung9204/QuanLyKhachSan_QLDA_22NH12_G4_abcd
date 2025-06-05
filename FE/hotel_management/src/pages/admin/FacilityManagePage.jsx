@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
+import BackToDashboard from '../../components/admin/BackToDashboard';
 
 const styles = {
     container: {
@@ -247,6 +248,7 @@ const FacilityManagePage = () => {
 
     return (
         <div style={styles.container}>
+            <BackToDashboard />
             <div style={styles.header}>
                 <h1 style={styles.title}>Quản lý thiết bị</h1>
                 <button style={styles.addButton} onClick={() => setIsModalVisible(true)}>
