@@ -137,3 +137,12 @@ exports.updateBookingStatus = catchAsync(async (req, res, next) => {
 
   ResponseHandler.success(res, 200, booking, message);
 });
+
+/**
+ * Get future pending bookings
+ * Get bookings with check-in and check-out dates greater than current time and status is pending
+ */
+exports.getFuturePendingBookings = catchAsync(async (req, res, next) => {
+  const bookings = await bookingService.getFuturePendingBookings(req.user);
+  ResponseHandler.success(res, 200, bookings, 'Future pending bookings retrieved successfully');
+});
