@@ -17,6 +17,9 @@ import CheckInManagePage from '../pages/staff/CheckInManagePage';
 import StaffLayout from '../layouts/StaffLayout';
 import AdminLayout from '../layouts/AdminLayout';
 import CheckOutManagePage from '../pages/staff/CheckOutManagePage';
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
+import BookingServicePage from '../pages/staff/BookingServicePage';
+import StaffBookingListPage from '../pages/staff/StaffBookingListPage';
 
 const AppRoutes = () => {
     return (
@@ -65,6 +68,8 @@ const AppRoutes = () => {
                                 <Route path="bookings" element={<BookingManagePage />} />
                                 <Route path='check-in' element={<CheckInManagePage />} />
                                 <Route path='check-out' element={<CheckOutManagePage />} />
+                                <Route path="services" element={<StaffBookingListPage />} />
+                                <Route path="bookings/:bookingId/services" element={<BookingServicePage />} />
                             </Routes>
                         </StaffLayout>
                     </PrivateRoute>
