@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const StaffNavigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuth();
 
   const menuItems = [
@@ -24,8 +25,8 @@ const StaffNavigation = () => {
     },
   ];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout(() => navigate('/login'));
   };
 
   return (

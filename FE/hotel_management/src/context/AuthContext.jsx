@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import api from '../api/axios';
 
 // Create auth context
 const AuthContext = createContext();
@@ -35,9 +36,23 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Logout function
-    const logout = () => {
-        setCurrentUser(null);
-        localStorage.removeItem('user');
+    const logout = async (callback) => {
+        try {
+            await api.post('/api/auth/logout');
+            setCurrentUser(null);
+            // Xóa token và user info từ localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Gọi callback function (sẽ được sử dụng để chuyển trang)
+            if (callback) callback();
+        } catch (error) {
+            console.error('Lỗi khi đăng xuất:', error);
+            // Ngay cả khi có lỗi, vẫn xóa dữ liệu local
+            setCurrentUser(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            if (callback) callback();
+        }
     };
 
     // Context value
