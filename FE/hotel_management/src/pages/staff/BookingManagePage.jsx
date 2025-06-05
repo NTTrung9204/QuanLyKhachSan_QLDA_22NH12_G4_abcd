@@ -338,6 +338,21 @@ const styles = {
         cursor: 'not-allowed',
         border: '1px solid #eee',
         color: '#000'
+    },
+    resetButton: {
+        padding: '12px 24px',
+        backgroundColor: '#ff4444',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        fontSize: '1rem',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s',
+        marginTop: 'auto',
+        alignSelf: 'flex-end',
+        '&:hover': {
+            backgroundColor: '#d32f2f'
+        }
     }
 };
 
@@ -379,9 +394,12 @@ export default function BookingManagePage() {
         customerCccd: '',
         customerPhone: '',
         customerAddress: '',
+        customerEmail: '',
         customerId: '',
-        notes: '',
-        paymentMethod: 'cash'
+        numAdult: 1,
+        numChild: 0,
+        birthDate: '',
+        gender: 'male'
     });
 
     useEffect(() => {
@@ -414,10 +432,28 @@ export default function BookingManagePage() {
             }
 
             const response = await api.get(url);
-            console.log(response.data.data);
-            setRoomTypesData(response.data.data.roomTypes || []);
+            console.log("API Response:", response.data.data);
+            
+            // Ensure roomTypes data is properly structured
+            const roomTypesData = response.data.data.roomTypes || [];
+            
+            // Map through the room types and ensure each room has its roomTypeId data
+            const processedRoomTypes = roomTypesData.map(roomType => ({
+                ...roomType,
+                availableRooms: roomType.availableRooms.map(room => ({
+                    ...room,
+                    roomTypeId: {
+                        _id: roomType._id,
+                        name: roomType.name,
+                        pricePerNight: roomType.pricePerNight,
+                        maxAdult: roomType.maxAdult,
+                        maxChild: roomType.maxChild
+                    }
+                }))
+            }));
 
-            console.log(roomTypesData);
+            setRoomTypesData(processedRoomTypes);
+            console.log("Processed Room Types:", processedRoomTypes);
 
             setError(null);
         } catch (err) {
@@ -455,8 +491,9 @@ export default function BookingManagePage() {
     };
 
     const handleRoomSelect = (room) => {
+        console.log("Selected Room Data:", room);
         setSelectedRoom(room);
-        // Reset customer info when selecting a new room
+        // Reset customer info and set default number of guests when selecting a new room
         setCustomerInfo(null);
         setCccd('');
         setBooking({
@@ -464,9 +501,12 @@ export default function BookingManagePage() {
             customerCccd: '',
             customerPhone: '',
             customerAddress: '',
+            customerEmail: '',
             customerId: '',
-            notes: '',
-            paymentMethod: 'cash'
+            numAdult: 1,
+            numChild: 0,
+            birthDate: '',
+            gender: 'male'
         });
     };
 
@@ -491,7 +531,10 @@ export default function BookingManagePage() {
                 customerCccd: customer.profile?.cccd || '',
                 customerPhone: customer.profile?.phone || '',
                 customerAddress: customer.profile?.address || '',
-                customerId: customer._id || ''
+                customerEmail: customer.profile?.email || '',
+                customerId: customer._id || '',
+                birthDate: customer.profile?.birthDate?.split('T')[0] || '',
+                gender: customer.profile?.gender || 'male'
             }));
         } catch (err) {
             console.error('Error fetching customer:', err);
@@ -510,11 +553,97 @@ export default function BookingManagePage() {
         }));
     };
 
+    function randomLetters(length) {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        return Array.from({ length }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
+    }
+
     const handleCreateBooking = async () => {
-        // TODO: Implement booking creation logic
-        console.log('Customer ID:', booking.customerId);
-        alert('Chức năng đặt phòng sẽ được triển khai sau');
-        handleClosePopup();
+        try {
+            // Validate required fields
+            const requiredFields = [
+                { field: 'customerName', label: 'Họ tên' },
+                { field: 'customerCccd', label: 'CCCD/CMND' },
+                { field: 'customerPhone', label: 'Số điện thoại' },
+                { field: 'customerEmail', label: 'Email' },
+                { field: 'birthDate', label: 'Ngày sinh' },
+                { field: 'customerAddress', label: 'Địa chỉ' }
+            ];
+
+            const missingFields = requiredFields.filter(
+                ({ field }) => !booking[field]?.trim()
+            );
+
+            if (missingFields.length > 0) {
+                alert(`Vui lòng điền đầy đủ thông tin sau:\n${missingFields.map(f => f.label).join('\n')}`);
+                return;
+            }
+
+            console.log(selectedRoom);
+
+            if (booking.numAdult > selectedRoom.roomTypeId.maxAdult) {
+                alert(`Số người lớn không được vượt quá ${selectedRoom.roomTypeId.maxAdult}`);
+                return;
+            }
+
+            if (booking.numChild > selectedRoom.roomTypeId.maxChild) {
+                alert(`Số trẻ em không được vượt quá ${selectedRoom.roomTypeId.maxChild}`);
+                return;
+            }
+
+            let customerId;
+
+            // Try to get existing user or create new one
+            try {
+                // First try to get existing user
+                const userResponse = await api.get(`/api/users/profile/${booking.customerCccd}`);
+                customerId = userResponse.data.data._id;
+            } catch (error) {
+                // If user not found, create new user
+                const createUserResponse = await api.post('/api/auth/signup', {
+                    "username": booking.customerEmail,
+                    "password": randomLetters(10),
+                    "fullName": booking.customerName,
+                    "phone": booking.customerPhone,
+                    "address": booking.customerAddress,
+                    "cccd": booking.customerCccd,
+                    "birthDate": booking.birthDate,
+                    "gender": booking.gender,
+                    "email": booking.customerEmail
+                });
+                
+                // Get the user profile after signup
+                const newUserResponse = await api.get(`/api/users/profile/${booking.customerCccd}`);
+                customerId = newUserResponse.data.data._id;
+            }
+
+            if (!customerId) {
+                throw new Error('Không thể lấy được ID khách hàng');
+            }
+
+            // Create booking with the obtained customerId
+            const bookingData = {
+                customerId: customerId,
+                rooms: [
+                    {
+                        roomId: selectedRoom._id,
+                        checkIn: formatDateTimeForAPI(checkIn),
+                        checkOut: formatDateTimeForAPI(checkOut),
+                        numAdult: booking.numAdult,
+                        numChild: booking.numChild
+                    }
+                ],
+                services: []
+            };
+
+            const bookingResponse = await api.post('/api/bookings', bookingData);
+            alert('Đặt phòng thành công!');
+            handleClosePopup();
+            fetchAvailableRooms(); // Refresh the room list
+        } catch (error) {
+            console.error('Error creating booking:', error);
+            alert(error.response?.data?.message || error.message || 'Có lỗi xảy ra khi đặt phòng');
+        }
     };
 
     const handleClosePopup = () => {
@@ -527,6 +656,23 @@ export default function BookingManagePage() {
         if (!dateString) return '';
         const date = new Date(dateString);
         return date.toLocaleDateString('vi-VN');
+    };
+
+    const handleResetCustomer = () => {
+        setCustomerInfo(null);
+        setCccd('');
+        setCustomerError(null);
+        setBooking(prev => ({
+            ...prev,
+            customerName: '',
+            customerCccd: '',
+            customerPhone: '',
+            customerAddress: '',
+            customerEmail: '',
+            customerId: '',
+            birthDate: '',
+            gender: 'male'
+        }));
     };
 
     return (
@@ -684,6 +830,28 @@ export default function BookingManagePage() {
                                     />
                                 </div>
                                 <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="roomType">Loại phòng:</label>
+                                    <input
+                                        style={{...styles.input, ...styles.readOnlyInput}}
+                                        type="text"
+                                        id="roomType"
+                                        value={selectedRoom?.roomTypeId?.name || ''}
+                                        readOnly
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="roomPrice">Giá:</label>
+                                    <input
+                                        style={{...styles.input, ...styles.readOnlyInput}}
+                                        type="text"
+                                        id="roomPrice"
+                                        value={selectedRoom?.roomTypeId?.pricePerNight ? 
+                                            `${new Intl.NumberFormat('vi-VN').format(selectedRoom.roomTypeId.pricePerNight)} ₫/đêm`
+                                            : ''}
+                                        readOnly
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
                                     <label style={styles.label} htmlFor="checkInTime">Check-in:</label>
                                     <input
                                         style={{...styles.input, ...styles.readOnlyInput}}
@@ -703,6 +871,56 @@ export default function BookingManagePage() {
                                         readOnly
                                     />
                                 </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="numAdult">Số người lớn:</label>
+                                    <input
+                                        style={styles.input}
+                                        type="number"
+                                        id="numAdult"
+                                        name="numAdult"
+                                        min="1"
+                                        max={selectedRoom?.roomTypeId?.maxAdult || 2}
+                                        value={booking.numAdult}
+                                        onChange={(e) => {
+                                            const value = parseInt(e.target.value);
+                                            if (value >= 1 && value <= (selectedRoom?.roomTypeId?.maxAdult || 2)) {
+                                                handleBookingInputChange(e);
+                                            }
+                                        }}
+                                        required
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="numChild">Số trẻ em:</label>
+                                    <input
+                                        style={styles.input}
+                                        type="number"
+                                        id="numChild"
+                                        name="numChild"
+                                        min="0"
+                                        max={selectedRoom?.roomTypeId?.maxChild || 1}
+                                        value={booking.numChild}
+                                        onChange={(e) => {
+                                            const value = parseInt(e.target.value);
+                                            if (value >= 0 && value <= (selectedRoom?.roomTypeId?.maxChild || 1)) {
+                                                handleBookingInputChange(e);
+                                            }
+                                        }}
+                                        required
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="roomCapacity">Sức chứa:</label>
+                                    <input
+                                        style={{...styles.input, ...styles.readOnlyInput}}
+                                        type="text"
+                                        id="roomCapacity"
+                                        value={selectedRoom?.roomTypeId ? 
+                                            `${selectedRoom.roomTypeId.maxAdult} người lớn, ${selectedRoom.roomTypeId.maxChild} trẻ em`
+                                            : ''}
+                                        readOnly
+                                    />
+                                </div>
                             </div>
                         </div>
                         
@@ -711,7 +929,7 @@ export default function BookingManagePage() {
                             
                             <div style={styles.formRow}>
                                 <div style={styles.formInputContainer}>
-                                    <label style={styles.label} htmlFor="cccd">CCCD/CMND:</label>
+                                    {/* <label style={styles.label} htmlFor="cccd">CCCD/CMND:</label> */}
                                     <div style={{display: 'flex', gap: '10px'}}>
                                         <input
                                             style={styles.input}
@@ -728,6 +946,24 @@ export default function BookingManagePage() {
                                         >
                                             {searchingCustomer ? 'Đang tìm...' : 'Tìm kiếm'}
                                         </button>
+                                        <button 
+                                            style={{
+                                                ...styles.resetButton,
+                                                marginTop: 0,
+                                                height: '41px',
+                                                backgroundColor: '#ff4444',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '8px 16px',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            onClick={handleResetCustomer}
+                                            type="button"
+                                        >
+                                            Xóa thông tin
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -740,7 +976,9 @@ export default function BookingManagePage() {
                             
                             <div style={styles.formGrid}>
                                 <div style={styles.formInputGroup}>
-                                    <label style={styles.label} htmlFor="customerName">Họ tên:</label>
+                                    <label style={styles.label} htmlFor="customerName">
+                                        Họ tên: <span style={{ color: 'red' }}>*</span>
+                                    </label>
                                     <input
                                         style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
                                         type="text"
@@ -750,10 +988,13 @@ export default function BookingManagePage() {
                                         onChange={handleBookingInputChange}
                                         placeholder="Họ tên khách hàng"
                                         readOnly={customerInfo !== null}
+                                        required
                                     />
                                 </div>
                                 <div style={styles.formInputGroup}>
-                                    <label style={styles.label} htmlFor="customerCccd">CCCD/CMND:</label>
+                                    <label style={styles.label} htmlFor="customerCccd">
+                                        CCCD/CMND: <span style={{ color: 'red' }}>*</span>
+                                    </label>
                                     <input
                                         style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
                                         type="text"
@@ -763,10 +1004,13 @@ export default function BookingManagePage() {
                                         onChange={handleBookingInputChange}
                                         placeholder="Số CCCD/CMND"
                                         readOnly={customerInfo !== null}
+                                        required
                                     />
                                 </div>
                                 <div style={styles.formInputGroup}>
-                                    <label style={styles.label} htmlFor="customerPhone">Số điện thoại:</label>
+                                    <label style={styles.label} htmlFor="customerPhone">
+                                        Số điện thoại: <span style={{ color: 'red' }}>*</span>
+                                    </label>
                                     <input
                                         style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
                                         type="text"
@@ -776,10 +1020,59 @@ export default function BookingManagePage() {
                                         onChange={handleBookingInputChange}
                                         placeholder="Số điện thoại"
                                         readOnly={customerInfo !== null}
+                                        required
                                     />
                                 </div>
                                 <div style={styles.formInputGroup}>
-                                    <label style={styles.label} htmlFor="customerAddress">Địa chỉ:</label>
+                                    <label style={styles.label} htmlFor="customerEmail">
+                                        Email: <span style={{ color: 'red' }}>*</span>
+                                    </label>
+                                    <input
+                                        style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
+                                        type="email"
+                                        id="customerEmail"
+                                        name="customerEmail"
+                                        value={booking.customerEmail}
+                                        onChange={handleBookingInputChange}
+                                        placeholder="Email"
+                                        readOnly={customerInfo !== null}
+                                        required
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="birthDate">
+                                        Ngày sinh: <span style={{ color: 'red' }}>*</span>
+                                    </label>
+                                    <input
+                                        style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
+                                        type="date"
+                                        id="birthDate"
+                                        name="birthDate"
+                                        value={booking.birthDate}
+                                        onChange={handleBookingInputChange}
+                                        readOnly={customerInfo !== null}
+                                        required
+                                    />
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="gender">Giới tính:</label>
+                                    <select
+                                        style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
+                                        id="gender"
+                                        name="gender"
+                                        value={booking.gender}
+                                        onChange={handleBookingInputChange}
+                                        disabled={customerInfo !== null}
+                                    >
+                                        <option value="male">Nam</option>
+                                        <option value="female">Nữ</option>
+                                        <option value="other">Khác</option>
+                                    </select>
+                                </div>
+                                <div style={styles.formInputGroup}>
+                                    <label style={styles.label} htmlFor="customerAddress">
+                                        Địa chỉ: <span style={{ color: 'red' }}>*</span>
+                                    </label>
                                     <input
                                         style={customerInfo ? {...styles.input, ...styles.readOnlyInput} : styles.input}
                                         type="text"
@@ -789,38 +1082,7 @@ export default function BookingManagePage() {
                                         onChange={handleBookingInputChange}
                                         placeholder="Địa chỉ"
                                         readOnly={customerInfo !== null}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style={styles.formSection}>
-                            <h3 style={styles.sectionTitle}>Thông tin thanh toán</h3>
-                            <div style={styles.formGrid}>
-                                <div style={styles.formInputGroup}>
-                                    <label style={styles.label} htmlFor="paymentMethod">Phương thức thanh toán:</label>
-                                    <select
-                                        style={styles.input}
-                                        id="paymentMethod"
-                                        name="paymentMethod"
-                                        value={booking.paymentMethod}
-                                        onChange={handleBookingInputChange}
-                                    >
-                                        <option value="cash">Tiền mặt</option>
-                                        <option value="credit_card">Thẻ tín dụng</option>
-                                        <option value="bank_transfer">Chuyển khoản</option>
-                                    </select>
-                                </div>
-                                <div style={styles.formInputGroup}>
-                                    <label style={styles.label} htmlFor="notes">Ghi chú:</label>
-                                    <input
-                                        style={styles.input}
-                                        type="text"
-                                        id="notes"
-                                        name="notes"
-                                        value={booking.notes}
-                                        onChange={handleBookingInputChange}
-                                        placeholder="Ghi chú đặt phòng"
+                                        required
                                     />
                                 </div>
                             </div>
