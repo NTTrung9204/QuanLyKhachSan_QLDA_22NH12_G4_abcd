@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const HotelToolbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [user, setUser] = useState(null);
@@ -59,24 +60,12 @@ const HotelToolbar = () => {
     setShowProfileMenu(!showProfileMenu);
   };
 
-  // Giả lập đăng nhập để test
-  const simulateLogin = () => {
-    const mockUser = {
-      _id: '123',
-      username: 'john_doe',
-      role: 'customer',
-      profile: {
-        fullName: 'John Doe',
-        phone: '0987654321',
-        address: '123 Đường Nguyễn Huệ, Quận 1, TP.HCM'
-      }
-    };
-    
-    localStorage.setItem('token', 'mock-token');
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    setIsLoggedIn(true);
-    setUser(mockUser);
-  };
+  // Nav items config
+  const navItems = [
+    { to: '/', label: 'Trang chủ', match: (path) => path === '/' },
+    { to: '/rooms', label: 'Đặt phòng', match: (path) => path.startsWith('/rooms') },
+    { to: '/services', label: 'Dịch vụ', match: (path) => path.startsWith('/services') },
+  ];
 
   return (
     <div style={styles.toolbar}>
@@ -91,10 +80,25 @@ const HotelToolbar = () => {
 
         {/* Navigation Menu */}
         <nav style={styles.navigation}>
-          <Link to="/" style={styles.navLink}>Trang chủ</Link>
-          <Link to="/rooms" style={styles.navLink}>Đặt phòng</Link>
-          <Link to="/services" style={styles.navLink}>Dịch vụ</Link>
-          <Link to="/contact" style={styles.navLink}>Liên hệ</Link>
+          {navItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              style={{
+                ...styles.navLink,
+                ...(item.match(location.pathname)
+                  ? {
+                      borderBottom: '3px solid #fff',
+                      borderRadius: 0,
+                      fontWeight: 700,
+                      background: 'none',
+                    }
+                  : {}),
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         {/* Auth Section */}
@@ -106,10 +110,6 @@ const HotelToolbar = () => {
               </button>
               <button style={styles.registerButton} onClick={handleRegister}>
                 Đăng ký
-              </button>
-              {/* Demo button để test */}
-              <button style={styles.demoButton} onClick={simulateLogin}>
-                Demo Login
               </button>
             </div>
           ) : (

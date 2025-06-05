@@ -8,12 +8,13 @@ import HomePage from '../pages/HomePage';
 import RegisterPage from '../pages/RegisterPage';
 import ImageManagePage from '../pages/admin/ImageManagePage';
 import FacilityManagePage from '../pages/admin/FacilityManagePage';
-import HotelSearchPage from '../pages/HotelSearchPage';
 import RoomTypeManagePage from '../pages/admin/RoomTypeManagePage';
 import RoomManagePage from '../pages/admin/RoomManagePage';
 import BookingManagePage from '../pages/staff/BookingManagePage';
 import ProfileViewPage from '../pages/customer/ProfileViewPage';
 import ServiceManagePage from '../pages/admin/ServiceManagePage';
+import HotelSearchPage from '../pages/HotelSearchPage';
+import HotelRoomsListing from '../pages/customer/HotelRoomsListing'; 
 
 const AppRoutes = () => {
     return (
@@ -31,6 +32,15 @@ const AppRoutes = () => {
                     </PrivateRoute>
                 } 
             />
+
+            <Route 
+                path="/rooms" 
+                element={
+                    <PrivateRoute>
+                        <HotelRoomsListing />
+                    </PrivateRoute>
+                } 
+            />  
 
             {/* Admin Routes */}
             <Route
