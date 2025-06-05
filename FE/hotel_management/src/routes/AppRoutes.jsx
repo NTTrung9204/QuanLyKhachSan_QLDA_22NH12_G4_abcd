@@ -13,6 +13,9 @@ import RoomManagePage from '../pages/admin/RoomManagePage';
 import BookingManagePage from '../pages/staff/BookingManagePage';
 import ProfileViewPage from '../pages/customer/ProfileViewPage';
 import ServiceManagePage from '../pages/admin/ServiceManagePage';
+import CheckInManagePage from '../pages/staff/CheckInManagePage';
+import StaffLayout from '../layouts/StaffLayout';
+import CheckOutManagePage from '../pages/staff/CheckOutManagePage';
 
 const AppRoutes = () => {
     return (
@@ -53,10 +56,14 @@ const AppRoutes = () => {
                 path="/staff/*" 
                 element={
                     <PrivateRoute allowedRoles={['staff']}>
-                        <Routes>
-                            <Route path="/" element={<div>Staff Dashboard</div>} />
-                            <Route path="bookings" element={<BookingManagePage />} />
-                        </Routes>
+                        <StaffLayout>
+                            <Routes>
+                                <Route path="/" element={<div>Staff Dashboard</div>} />
+                                <Route path="bookings" element={<BookingManagePage />} />
+                                <Route path='check-in' element={<CheckInManagePage />} />
+                                <Route path='check-out' element={<CheckOutManagePage />} />
+                            </Routes>
+                        </StaffLayout>
                     </PrivateRoute>
                 } 
             />
