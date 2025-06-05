@@ -8,6 +8,7 @@ import HomePage from '../pages/HomePage';
 import RegisterPage from '../pages/RegisterPage';
 import ImageManagePage from '../pages/admin/ImageManagePage';
 import FacilityManagePage from '../pages/admin/FacilityManagePage';
+import HotelSearchPage from '../pages/HotelSearchPage';
 import RoomTypeManagePage from '../pages/admin/RoomTypeManagePage';
 import RoomManagePage from '../pages/admin/RoomManagePage';
 import BookingManagePage from '../pages/staff/BookingManagePage';
@@ -29,7 +30,7 @@ const AppRoutes = () => {
                 path="/" 
                 element={
                     <PrivateRoute>
-                        <HomePage />
+                        <HotelSearchPage />
                     </PrivateRoute>
                 } 
             />

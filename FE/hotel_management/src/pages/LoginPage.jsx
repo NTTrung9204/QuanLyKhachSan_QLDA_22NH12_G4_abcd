@@ -59,7 +59,7 @@ const LoginPage = () => {
         }
       }, 1500);
 
-    } catch (error) {
+    } catch {
       setError('Đăng nhập thất bại. Vui lòng kiểm tra lại tên đăng nhập và mật khẩu.');
       setLoading(false);
     }
@@ -67,10 +67,6 @@ const LoginPage = () => {
 
   const handleGoogleLogin = () => {
     console.log('Continue with Google');
-  };
-
-  const handleFacebookLogin = () => {
-    console.log('Continue with Facebook');
   };
 
   return (
@@ -429,21 +425,10 @@ const styles = {
       borderColor: '#9ca3af'
     }
   },
-  facebookButton: {
-    '&:hover': {
-      backgroundColor: '#f0f9ff',
-      borderColor: '#60a5fa'
-    }
-  },
   googleIcon: {
     fontWeight: 'bold',
     fontSize: '1rem',
     color: '#ea4335'
-  },
-  facebookIcon: {
-    fontWeight: 'bold',
-    fontSize: '1.1rem',
-    color: '#1877f2'
   },
   registerPrompt: {
     textAlign: 'center',
