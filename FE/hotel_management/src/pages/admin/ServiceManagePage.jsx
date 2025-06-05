@@ -14,6 +14,8 @@ const ServiceManagePage = () => {
     price: '',
     description: ''
   });
+  const [editingService, setEditingService] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Fetch services
   const fetchServices = async () => {
@@ -49,7 +51,9 @@ const ServiceManagePage = () => {
     setFormData({ name: '', price: '', description: '' });
     setSelectedImage(null);
     setImageId(null);
-  };  
+    setEditingService(null);
+    setIsEditMode(false);
+  };
 
   const showImageModal = () => {
     fetchImages();
@@ -70,6 +74,19 @@ const ServiceManagePage = () => {
     }));
   };
 
+  const handleEdit = (service) => {
+    setEditingService(service);
+    setFormData({
+      name: service.name,
+      price: service.price,
+      description: service.description
+    });
+    setSelectedImage(service.imageId.path);
+    setImageId(service.imageId._id);
+    setIsEditMode(true);
+    setIsModalVisible(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedImage && !imageId) {
@@ -77,18 +94,30 @@ const ServiceManagePage = () => {
       return;
     }
     try {
-      await api.post('/api/services', {
-        ...formData,
-        imageId: imageId
-      });
-      alert('Service added successfully');
+      if (isEditMode && editingService) {
+        // Update existing service
+        await api.patch(`/api/services/${editingService._id}`, {
+          ...formData,
+          imageId: imageId
+        });
+        alert('Service updated successfully');
+      } else {
+        // Create new service
+        await api.post('/api/services', {
+          ...formData,
+          imageId: imageId
+        });
+        alert('Service added successfully');
+      }
       setIsModalVisible(false);
       setFormData({ name: '', price: '', description: '' });
       setSelectedImage(null);
       setImageId(null);
+      setEditingService(null);
+      setIsEditMode(false);
       fetchServices();
     } catch (error) {
-      alert('Failed to add service');
+      alert(isEditMode ? 'Failed to update service' : 'Failed to add service');
     }
   };
 
@@ -137,6 +166,12 @@ const ServiceManagePage = () => {
                 <td>{service.description}</td>
                 <td>
                   <button 
+                    className="edit-button"
+                    onClick={() => handleEdit(service)}
+                  >
+                    Edit
+                  </button>
+                  <button 
                     className="delete-button"
                     onClick={() => handleDeleteService(service._id)}
                   >
@@ -153,7 +188,7 @@ const ServiceManagePage = () => {
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h3>Add New Service</h3>
+              <h3>{isEditMode ? 'Edit Service' : 'Add New Service'}</h3>
               <button className="close-button" onClick={handleCancel}>&times;</button>
             </div>
             <form onSubmit={handleSubmit} className="service-form">
@@ -516,6 +551,23 @@ const ServiceManagePage = () => {
           border-radius: 4px;
         }
 
+        .edit-button {
+          background-color: #2196F3;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: all 0.3s ease;
+          margin-right: 8px;
+        }
+
+        .edit-button:hover {
+          background-color: #1976D2;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
         .delete-button {
           background-color: #f44336;
           color: white;
@@ -535,7 +587,7 @@ const ServiceManagePage = () => {
         th:last-child,
         td:last-child {
           text-align: center;
-          width: 100px;
+          width: 150px;
         }
       `}</style>
     </div>
