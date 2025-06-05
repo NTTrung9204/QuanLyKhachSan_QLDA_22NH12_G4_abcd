@@ -8,7 +8,6 @@ import HomePage from '../pages/HomePage';
 import RegisterPage from '../pages/RegisterPage';
 import ImageManagePage from '../pages/admin/ImageManagePage';
 import FacilityManagePage from '../pages/admin/FacilityManagePage';
-import HotelSearchPage from '../pages/HotelSearchPage';
 import RoomTypeManagePage from '../pages/admin/RoomTypeManagePage';
 import RoomManagePage from '../pages/admin/RoomManagePage';
 import BookingManagePage from '../pages/staff/BookingManagePage';
@@ -16,6 +15,7 @@ import ProfileViewPage from '../pages/customer/ProfileViewPage';
 import ServiceManagePage from '../pages/admin/ServiceManagePage';
 import CheckInManagePage from '../pages/staff/CheckInManagePage';
 import StaffLayout from '../layouts/StaffLayout';
+import AdminLayout from '../layouts/AdminLayout';
 import CheckOutManagePage from '../pages/staff/CheckOutManagePage';
 
 const AppRoutes = () => {
@@ -30,7 +30,7 @@ const AppRoutes = () => {
                 path="/" 
                 element={
                     <PrivateRoute>
-                        <HotelSearchPage />
+                        <HomePage />
                     </PrivateRoute>
                 } 
             />
@@ -40,14 +40,16 @@ const AppRoutes = () => {
                 path="/admin/*" 
                 element={
                     <PrivateRoute allowedRoles={['admin']}>
-                        <Routes style={{backgroundColor : '#f8fafc', width : '100%'}}>
-                            <Route path="/" element={<div>Admin Dashboard</div>} />
-                            <Route path="rooms" element={<RoomManagePage />} />
-                            <Route path="services" element={<ServiceManagePage />} />
-                            <Route path="images" element={<ImageManagePage />} />
-                            <Route path="facilities" element={<FacilityManagePage />} />
-                            <Route path="type-rooms" element={<RoomTypeManagePage />} />
-                        </Routes>
+                        <AdminLayout>
+                            <Routes>
+                                <Route path="/" element={<RoomManagePage />} />
+                                <Route path="rooms" element={<RoomManagePage />} />
+                                <Route path="services" element={<ServiceManagePage />} />
+                                <Route path="images" element={<ImageManagePage />} />
+                                <Route path="facilities" element={<FacilityManagePage />} />
+                                <Route path="type-rooms" element={<RoomTypeManagePage />} />
+                            </Routes>
+                        </AdminLayout>
                     </PrivateRoute>
                 } 
             />
