@@ -8,6 +8,7 @@ const CheckOutManagePage = () => {
   const [error, setError] = useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
   const navigate = useNavigate();
 
   // Helper function to format date with time
@@ -44,7 +45,19 @@ const CheckOutManagePage = () => {
 
   const handleCheckOut = async (bookingId) => {
     try {
+      setLoading(true);
+      // First, perform the check-out
       await api.patch(`/api/bookings/${bookingId}/check-out`);
+      
+      // Then, send the bill via email
+      try {
+        await api.post(`/api/billing/${bookingId}/send-bill`);
+        setSuccessMessage('Check-out successful and bill has been sent to customer\'s email.');
+      } catch (emailErr) {
+        console.error('Error sending bill:', emailErr);
+        setSuccessMessage('Check-out successful but failed to send bill via email.');
+      }
+
       setShowConfirmation(false);
       setSelectedBooking(null);
       // Refresh the bookings list after successful check-out
@@ -52,12 +65,17 @@ const CheckOutManagePage = () => {
     } catch (err) {
       setError('Failed to check out. Please try again.');
       console.error('Error checking out:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const openCheckOutConfirmation = (booking) => {
     setSelectedBooking(booking);
     setShowConfirmation(true);
+    // Clear any existing messages
+    setError(null);
+    setSuccessMessage(null);
   };
 
   const closeCheckOutConfirmation = () => {
@@ -80,6 +98,12 @@ const CheckOutManagePage = () => {
       {error && (
         <div className="error-message">
           {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="success-message">
+          {successMessage}
         </div>
       )}
 
@@ -425,6 +449,15 @@ styleSheet.textContent = `
     .page-title {
       font-size: 20px;
     }
+  }
+
+  .success-message {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    border: 1px solid #a5d6a7;
   }
 `;
 document.head.appendChild(styleSheet);
