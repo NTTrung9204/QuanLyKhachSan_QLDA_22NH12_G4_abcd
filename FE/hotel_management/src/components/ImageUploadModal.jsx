@@ -48,7 +48,7 @@ const ImageUploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
 
       onUploadSuccess(response.data);
       handleClose();
-    } catch (error) {
+    } catch {
       setError('Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại.');
     } finally {
       setLoading(false);
