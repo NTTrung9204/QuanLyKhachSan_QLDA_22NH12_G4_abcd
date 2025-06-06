@@ -262,10 +262,10 @@ const StatisticsDashboard = () => {
 
     const fetchDashboardStats = async () => {
         try {
-            const response = await statisticsApi.getDashboardStats();
-            console.log('Dashboard stats response:', response.data);
+            // const response = await statisticsApi.getDashboardStats();
+            // console.log('Dashboard stats response:', response.data);
             
-            setDashboardStats(response.data);
+            // setDashboardStats(response.data);
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
             setDashboardStats(null);
