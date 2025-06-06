@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const HotelIntroSection = () => {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
 
@@ -99,7 +101,7 @@ const HotelIntroSection = () => {
                   fontWeight: 300,
                   marginBottom: '0.75rem'
                 }}>
-                  KHÁCH SẠN BIỂN XANH
+                  KHÁCH SẠN ABCD
                 </div>
                 <div style={{
                   fontSize: '1.5rem',
@@ -202,18 +204,20 @@ const HotelIntroSection = () => {
                 width: '100%',
                 marginTop: '2rem'
               }}>
-                <button style={{
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  padding: '1rem 2rem',
-                  borderRadius: '0.5rem',
-                  fontWeight: 500,
-                  transition: 'all 0.3s ease',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '1.1rem',
-                  minWidth: '200px'
-                }}>
+                <button 
+                  onClick={() => navigate('/rooms')}
+                  style={{
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    padding: '1rem 2rem',
+                    borderRadius: '0.5rem',
+                    fontWeight: 500,
+                    transition: 'all 0.3s ease',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.1rem',
+                    minWidth: '200px'
+                  }}>
                   Đặt Phòng Ngay →
                 </button>
               </div>

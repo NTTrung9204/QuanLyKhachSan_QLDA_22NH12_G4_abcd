@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import PrivateRoute from '../components/PrivateRoute';
+import BookingHistory from '../components/BookingHistory.jsx';
 
 // Import pages
 import LoginPage from '../pages/LoginPage';
@@ -51,6 +52,7 @@ const AppRoutes = () => {
                                         <PrivateRoute allowedRoles={['customer']}>
                                             <Routes>
                                                 <Route path="profile" element={<ProfileViewPage />} />
+                                                <Route path="booking-history" element={<BookingHistory />} />
                                             </Routes>
                                         </PrivateRoute>
                                     }
