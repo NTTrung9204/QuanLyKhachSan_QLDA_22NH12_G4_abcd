@@ -204,66 +204,69 @@ const StaffBookingListPage = () => {
                 <div style={styles.noResults}>Không tìm thấy booking nào</div>
             ) : (
                 <div style={styles.bookingsContainer}>
-                    {bookings.map((booking) => (
-                        <div key={booking._id} style={styles.bookingCard}>
-                            <div style={styles.bookingHeader}>
-                                <div style={styles.bookingHeaderLeft}>
-                                    <h3 style={styles.bookingId}>Booking #{booking._id.slice(-6)}</h3>
-                                    <span style={{
-                                        ...styles.statusBadge,
-                                        backgroundColor: getStatusColor(booking.status)
-                                    }}>
-                                        {getStatusText(booking.status)}
-                                    </span>
-                                </div>
-                                {booking.status === 'checked_in' && (
-                                    <button
-                                        style={styles.addServiceButton}
-                                        onClick={() => handleAddService(booking._id)}
-                                    >
-                                        Thêm dịch vụ
-                                    </button>
-                                )}
-                            </div>
-
-                            <div style={styles.bookingContent}>
-                                <div style={styles.roomInfo}>
-                                    {booking.rooms.map((room, index) => (
-                                        <div key={index} style={styles.roomDetails}>
-                                            <h4 style={styles.roomName}>{room.roomId.roomTypeId.name} - {room.roomId.name}</h4>
-                                            <p>Check-in: {formatDate(room.checkIn)}</p>
-                                            <p>Check-out: {formatDate(room.checkOut)}</p>
-                                            <p>Số người: {room.numAdult} người lớn, {room.numChild} trẻ em</p>
+                    {bookings.map((booking) => {
+                        if(booking.status === 'checked_in') {
+                            return (
+                                <div key={booking._id} style={styles.bookingCard}>
+                                    <div style={styles.bookingHeader}>
+                                        <div style={styles.bookingHeaderLeft}>
+                                            <h3 style={styles.bookingId}>Booking #{booking._id.slice(-6)}</h3>
+                                            <span style={{
+                                                ...styles.statusBadge,
+                                                backgroundColor: getStatusColor(booking.status)
+                                            }}>
+                                                {getStatusText(booking.status)}
+                                            </span>
                                         </div>
-                                    ))}
-                                </div>
+                                        <button
+                                            style={styles.addServiceButton}
+                                            onClick={() => handleAddService(booking._id)}
+                                        >
+                                            Thêm dịch vụ
+                                        </button>
+                                    </div>
 
-                                <div style={styles.bookingInfo}>
-                                    <div style={styles.totalAmount}>
-                                        <span>Tổng tiền: {formatPrice(booking.totalAmount)}</span>
-                                    </div>
-                                    <div style={styles.bookingDate}>
-                                        <span>Ngày tạo: {formatDate(booking.createdAt)}</span>
-                                    </div>
-                                    {booking.services && booking.services.length > 0 && (
-                                        <div style={styles.servicesList}>
-                                            <h4 style={styles.servicesTitle}>Dịch vụ đã đặt:</h4>
-                                            <div style={styles.servicesTable}>
-                                                {booking.services.map((service, index) => (
-                                                    <div key={index} style={styles.serviceRow}>
-                                                        <span style={styles.serviceName}>{service.serviceId.name}</span>
-                                                        <span style={styles.serviceQuantity}>x{service.quantity}</span>
-                                                        <span style={styles.servicePrice}>{formatPrice(service.serviceId.price)}</span>
-                                                        <span style={styles.serviceDate}>{formatDate(service.useDate)}</span>
-                                                    </div>
-                                                ))}
+                                    <div style={styles.bookingContent}>
+                                        <div style={styles.roomInfo}>
+                                            {booking.rooms.map((room, index) => (
+                                                <div key={index} style={styles.roomDetails}>
+                                                    <h4 style={styles.roomName}>{room.roomId.roomTypeId.name} - {room.roomId.name}</h4>
+                                                    <p>Check-in: {formatDate(room.checkIn)}</p>
+                                                    <p>Check-out: {formatDate(room.checkOut)}</p>
+                                                    <p>Số người: {room.numAdult} người lớn, {room.numChild} trẻ em</p>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div style={styles.bookingInfo}>
+                                            <div style={styles.totalAmount}>
+                                                <span>Tổng tiền: {formatPrice(booking.totalAmount)}</span>
                                             </div>
+                                            <div style={styles.bookingDate}>
+                                                <span>Ngày tạo: {formatDate(booking.createdAt)}</span>
+                                            </div>
+                                            {booking.services && booking.services.length > 0 && (
+                                                <div style={styles.servicesList}>
+                                                    <h4 style={styles.servicesTitle}>Dịch vụ đã đặt:</h4>
+                                                    <div style={styles.servicesTable}>
+                                                        {booking.services.map((service, index) => (
+                                                            <div key={index} style={styles.serviceRow}>
+                                                                <span style={styles.serviceName}>{service.serviceId.name}</span>
+                                                                <span style={styles.serviceQuantity}>x{service.quantity}</span>
+                                                                <span style={styles.servicePrice}>{formatPrice(service.serviceId.price)}</span>
+                                                                <span style={styles.serviceDate}>{formatDate(service.useDate)}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    ))}
+                            );
+                        }
+                        return null;
+                    })}
                 </div>
             )}
         </div>

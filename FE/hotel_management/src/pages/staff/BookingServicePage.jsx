@@ -203,9 +203,9 @@ const BookingServicePage = () => {
                                     <p>Số lượng: {service.quantity}</p>
                                     <p>Giá: {formatPrice(service.serviceId.price)}</p>
                                     <p>Thành tiền: {formatPrice(service.serviceId.price * service.quantity)}</p>
-                                    <p>Ngày sử dụng: {formatDate(service.useDate)}</p>
+                                    {/* <p>Ngày sử dụng: {formatDate(service.useDate)}</p>
                                     <p>Phòng: {service.roomIndex + 1}</p>
-                                    <p>Người thêm: {service.addedBy?.profile.firstName} {service.addedBy?.profile.lastName}</p>
+                                    <p>Người thêm: {service.addedBy?.profile.firstName} {service.addedBy?.profile.lastName}</p> */}
                                 </div>
                             ))}
                         </div>
