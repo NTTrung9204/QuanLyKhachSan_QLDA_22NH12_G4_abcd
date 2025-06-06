@@ -1,6 +1,6 @@
 const express = require('express');
 const authController = require('../controllers/authController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, restrictTo } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -10,5 +10,12 @@ router.post('/login', authController.login);
 
 // Protected routes
 router.post('/logout', protect, authController.logout);
+
+// Admin Staff Management Routes
+router.use(protect, restrictTo('admin')); // Protect all routes below this middleware
+router.get('/staff', authController.getAllStaff);
+router.post('/staff', authController.createStaff);
+router.patch('/staff/:id', authController.updateStaff);
+router.get('/staff/:id', authController.getStaffById);
 
 module.exports = router;
