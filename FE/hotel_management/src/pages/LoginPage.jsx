@@ -157,18 +157,18 @@ const LoginPage = () => {
               ) : 'Đăng nhập'}
             </button>
 
-            <div style={styles.divider}>
+            {/* <div style={styles.divider}>
               <span style={styles.dividerText}>hoặc</span>
-            </div>
+            </div> */}
 
-            <button 
+            {/* <button 
               type="button"
               style={styles.socialButton}
               onClick={handleGoogleLogin}
             >
               <span style={styles.googleIcon}>G</span>
               Tiếp tục với Google
-            </button>
+            </button> */}
 
             <div style={styles.registerPrompt}>
               <p>Chưa có tài khoản? <Link to="/register" style={styles.registerLink}>Đăng ký ngay</Link></p>
