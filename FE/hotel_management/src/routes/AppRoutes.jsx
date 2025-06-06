@@ -23,6 +23,7 @@ import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
 import BookingServicePage from '../pages/staff/BookingServicePage';
 import StaffBookingListPage from '../pages/staff/StaffBookingListPage';
 import StatisticsDashboard from '../pages/admin/StatisticsDashboard';
+import CustomerLayout from '../layouts/CustomerLayout';
 
 const AppRoutes = () => {
     return (
@@ -33,22 +34,28 @@ const AppRoutes = () => {
 
             {/* Protected Routes */}
             <Route 
-                path="/" 
+                path="/*" 
                 element={
                     <PrivateRoute>
-                        <HomePage />
+                        <CustomerLayout>
+                            <Routes>
+                                <Route path="/" element={<HotelSearchPage />} />
+                                <Route path="rooms" element={<HotelRoomsListing />} />
+                                <Route 
+                                    path="customer/*" 
+                                    element={
+                                        <PrivateRoute allowedRoles={['customer']}>
+                                            <Routes>
+                                                <Route path="profile" element={<ProfileViewPage />} />
+                                            </Routes>
+                                        </PrivateRoute>
+                                    } 
+                                />
+                            </Routes>
+                        </CustomerLayout>
                     </PrivateRoute>
                 } 
             />
-
-            <Route 
-                path="/rooms" 
-                element={
-                    <PrivateRoute>
-                        <HotelRoomsListing />
-                    </PrivateRoute>
-                } 
-            />  
 
             {/* Admin Routes */}
             <Route
@@ -90,18 +97,7 @@ const AppRoutes = () => {
             />
 
             {/* Customer Routes */}
-            <Route 
-                path="/customer/*" 
-                element={
-                    <PrivateRoute allowedRoles={['customer']}>
-                        <Routes>
-                            <Route path="/" element={<div>Customer Dashboard</div>} />
-                            <Route path="bookings" element={<div>My Bookings</div>} />
-                            <Route path="profile" element={<ProfileViewPage />} />
-                        </Routes>
-                    </PrivateRoute>
-                } 
-            />
+            
 
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
