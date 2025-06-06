@@ -8,7 +8,6 @@ axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 const HotelRoomsListing = () => {
-  const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -16,7 +15,15 @@ const HotelRoomsListing = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rooms, setRooms] = useState([]);
-  const [imageMap, setImageMap] = useState({});
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [scrollY, setScrollY] = useState(0);
+
+  // Scroll effect for background parallax
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     setIsVisible(true);
@@ -31,7 +38,6 @@ const HotelRoomsListing = () => {
       images.forEach(img => {
         map[img._id] = img.path;
       });
-      setImageMap(map);
       return map;
     } catch (err) {
       console.error('Error fetching images:', err);
@@ -48,9 +54,9 @@ const HotelRoomsListing = () => {
         axios.get(`${API_BASE_URL}/api/room-types`),
         fetchImages()
       ]);
-      
+
       console.log('Raw API response:', roomResponse.data);
-      
+
       if (!roomResponse.data.data || !Array.isArray(roomResponse.data.data)) {
         throw new Error('Invalid data format from API');
       }
@@ -81,27 +87,10 @@ const HotelRoomsListing = () => {
     }
   };
 
-  const filterOptions = [
-    { key: 'all', label: 'Tất Cả Phòng', count: rooms.reduce((sum, room) => sum + (room.roomCount || 1), 0) },
-    ...Array.from(new Set(rooms.map(room => room.type))).map(type => {
-      const roomsOfType = rooms.filter(r => r.type === type);
-      return {
-        key: type,
-        label: roomsOfType[0]?.name || type,
-        count: roomsOfType.reduce((sum, room) => sum + (room.roomCount || 1), 0)
-      };
-    })
-  ];
-
-  console.log('Current filter options:', filterOptions);
-
   const filteredRooms = rooms.filter(room => {
-    const matchesFilter = selectedFilter === 'all' || room.type === selectedFilter;
     const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesFilter && matchesSearch;
+    return matchesSearch;
   });
-
-  console.log('Filtered rooms:', filteredRooms);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price);
@@ -116,18 +105,106 @@ const HotelRoomsListing = () => {
     return (
       <div style={{
         minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        background: `
+          linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%),
+          url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80')
+        `,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        padding: '4rem 0'
       }}>
         <div style={{
-          color: 'white',
-          fontSize: '1.2rem',
-          textAlign: 'center'
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '0 2rem'
         }}>
-          Đang tải dữ liệu...
+          <div style={{
+            textAlign: 'center',
+            color: 'white',
+            marginBottom: '4rem'
+          }}>
+            <div style={{
+              fontSize: '4rem',
+              fontWeight: '100',
+              marginBottom: '1rem',
+              textShadow: '0 4px 20px rgba(0,0,0,0.5)',
+              animation: 'fadeInUp 1s ease'
+            }}>
+              Đang tải phòng...
+            </div>
+            <div style={{
+              fontSize: '2.5rem',
+              animation: 'float 3s ease-in-out infinite'
+            }}>
+              ✨
+            </div>
+          </div>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+            gap: '2rem'
+          }}>
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} style={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: '24px',
+                overflow: 'hidden',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                animation: 'shimmer 2s infinite'
+              }}>
+                <div style={{
+                  height: '300px',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                  animation: 'shimmerWave 2s infinite'
+                }} />
+                <div style={{ padding: '2rem' }}>
+                  <div style={{
+                    height: '28px',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
+                    marginBottom: '1rem'
+                  }} />
+                  <div style={{
+                    height: '20px',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
+                    marginBottom: '1rem',
+                    width: '60%'
+                  }} />
+                  <div style={{
+                    height: '80px',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
+                    marginBottom: '2rem'
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+
+        <style>{`
+          @keyframes shimmer {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+          }
+          @keyframes shimmerWave {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+        `}</style>
       </div>
     );
   }
@@ -136,27 +213,40 @@ const HotelRoomsListing = () => {
     return (
       <div style={{
         minHeight: '100vh',
+        background: `
+          linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%),
+          url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80')
+        `,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        justifyContent: 'center'
       }}>
         <div style={{
           color: 'white',
-          fontSize: '1.2rem',
-          textAlign: 'center'
+          fontSize: '1.5rem',
+          textAlign: 'center',
+          backgroundColor: 'rgba(0,0,0,0.4)',
+          padding: '3rem',
+          borderRadius: '20px',
+          backdropFilter: 'blur(20px)'
         }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>😔</div>
           {error}
           <button
-            onClick={fetchRoomTypes}
+            onClick={() => window.location.reload()}
             style={{
-              marginTop: '1rem',
-              padding: '0.8rem 1.5rem',
-              backgroundColor: 'white',
-              color: '#3b82f6',
-              border: 'none',
-              borderRadius: '10px',
-              cursor: 'pointer'
+              marginTop: '2rem',
+              padding: '1rem 2rem',
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              transition: 'all 0.3s ease',
+              backdropFilter: 'blur(10px)'
             }}
           >
             Thử lại
@@ -169,53 +259,71 @@ const HotelRoomsListing = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '2rem 0'
+      background: `
+        linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.85) 100%),
+        url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80')
+      `,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
     }}>
-      {/* Header */}
+      {/* Floating background elements */}
       <div style={{
-        maxWidth: '1400px',
-        margin: '0 auto',
-        padding: '0 2rem',
-        marginBottom: '3rem'
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        opacity: 0.1,
+        pointerEvents: 'none',
+        background: `
+          radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%)
+        `
+      }} />
+
+      {/* Header Section */}
+      <div style={{
+        padding: '6rem 2rem 4rem',
+        textAlign: 'center',
+        transform: `translateY(${scrollY * 0.3}px)`
       }}>
         <div style={{
-          textAlign: 'center',
-          color: 'white',
-          marginBottom: '2rem',
-          transform: isVisible ? 'translateY(0)' : 'translateY(-30px)',
+          maxWidth: '1000px',
+          margin: '0 auto',
+          transform: isVisible ? 'translateY(0)' : 'translateY(-50px)',
           opacity: isVisible ? 1 : 0,
-          transition: 'all 0.8s ease'
+          transition: 'all 1.2s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
           <h1 style={{
-            fontSize: '3rem',
-            fontWeight: '300',
-            marginBottom: '1rem',
-            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            fontSize: 'clamp(3rem, 8vw, 6rem)',
+            fontWeight: '100',
+            marginBottom: '1.5rem',
+            background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            letterSpacing: '-0.02em'
           }}>
             Danh Sách Phòng
           </h1>
           <p style={{
-            fontSize: '1.2rem',
-            opacity: 0.9,
-            maxWidth: '600px',
-            margin: '0 auto'
+            fontSize: '1.4rem',
+            color: 'rgba(255,255,255,0.9)',
+            maxWidth: '700px',
+            margin: '0 auto 3rem',
+            lineHeight: '1.6',
+            fontWeight: '300'
           }}>
-            Khám phá các loại phòng cao cấp tại Khách Sạn ABCD
+            Khám phá các loại phòng sang trọng với tiện nghi đẳng cấp quốc tế
           </p>
-        </div>
 
-        {/* Search and Filter */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.5rem',
-          alignItems: 'center'
-        }}>
-          {/* Search */}
+          {/* Search Bar */}
           <div style={{
-            position: 'relative',
-            minWidth: '300px'
+            maxWidth: '500px',
+            margin: '0 auto 2rem',
+            position: 'relative'
           }}>
             <input
               type="text"
@@ -224,47 +332,17 @@ const HotelRoomsListing = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
-                padding: '1rem 1.5rem',
-                borderRadius: '50px',
-                border: 'none',
-                fontSize: '1rem',
-                backgroundColor: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+                padding: '1.2rem 2rem',
+                borderRadius: '60px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                fontSize: '1.1rem',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(20px)',
+                color: 'white',
+                outline: 'none',
+                transition: 'all 0.3s ease'
               }}
             />
-          </div>
-
-          {/* Filter Buttons */}
-          <div style={{
-            display: 'flex',
-            gap: '0.5rem',
-            flexWrap: 'wrap'
-          }}>
-            {filterOptions.map(option => (
-              <button
-                key={option.key}
-                onClick={() => setSelectedFilter(option.key)}
-                style={{
-                  padding: '0.8rem 1.5rem',
-                  borderRadius: '25px',
-                  border: 'none',
-                  backgroundColor: selectedFilter === option.key 
-                    ? 'rgba(255,255,255,0.95)' 
-                    : 'rgba(255,255,255,0.2)',
-                  color: selectedFilter === option.key ? '#333' : 'white',
-                  fontWeight: selectedFilter === option.key ? '600' : '400',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: selectedFilter === option.key 
-                    ? '0 4px 20px rgba(0,0,0,0.1)' 
-                    : 'none'
-                }}
-              >
-                {option.label} ({option.count})
-              </button>
-            ))}
           </div>
         </div>
       </div>
@@ -273,119 +351,146 @@ const HotelRoomsListing = () => {
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto',
-        padding: '0 2rem'
+        padding: '0 2rem 6rem'
       }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-          gap: '2rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+          gap: '3rem'
         }}>
           {filteredRooms.length > 0 ? (
-            filteredRooms.map((room, index) => (
+            filteredRooms.map((room) => (
               <div
                 key={room.id}
                 style={{
-                  backgroundColor: 'rgba(255,255,255,0.95)',
-                  borderRadius: '20px',
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  borderRadius: '28px',
                   overflow: 'hidden',
-                  boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
-                  backdropFilter: 'blur(10px)',
-                  transition: 'all 0.3s ease',
-                  transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(80px) scale(0.9)',
                   opacity: isVisible ? 1 : 0,
-                  transitionDelay: `${index * 0.1}s`
+                  cursor: 'pointer'
                 }}
+                onMouseEnter={() => setHoveredCard(room.id)}
+                onMouseLeave={() => setHoveredCard(null)}
               >
-                {/* Room content */}
+                {/* Room Image */}
                 <div style={{
-                  height: '250px',
-                  backgroundColor: '#f5f5f5',
-                  backgroundImage: room.images && room.images.length > 0 ? 
-                    `url(${room.images[0]})` :
-                    'url(https://plus.unsplash.com/premium_photo-1678297269904-6c46528b36a1?q=80&w=1470&auto=format&fit=crop)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  position: 'relative'
+                  height: '320px',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}>
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: room.images && room.images.length > 0 ? 
+                      `url(${room.images[0]})` :
+                      'url(https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    transition: 'transform 0.6s ease',
+                    transform: hoveredCard === room.id ? 'scale(1.1)' : 'scale(1)'
+                  }} />
+                  
+                  {/* Gradient overlay */}
                   <div style={{
                     position: 'absolute',
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    padding: '1rem',
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
-                    color: 'white'
+                    height: '50%',
+                    background: 'linear-gradient(transparent, rgba(0,0,0,0.7))'
+                  }} />
+                  
+                  {/* Price badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '1.5rem',
+                    right: '1.5rem',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    color: 'white',
+                    padding: '0.8rem 1.5rem',
+                    borderRadius: '20px',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255,255,255,0.2)'
                   }}>
-                    <div style={{fontSize: '0.9rem'}}>
-                      {room.capacity.adult} người lớn, {room.capacity.child} trẻ em
-                    </div>
+                    {formatPrice(room.price)}đ/đêm
                   </div>
                 </div>
                 
-                <div style={{ padding: '1.5rem' }}>
+                {/* Content */}
+                <div style={{ padding: '2rem' }}>
                   <h3 style={{
-                    fontSize: '1.5rem',
+                    fontSize: '1.8rem',
                     fontWeight: '600',
-                    marginBottom: '0.5rem'
+                    marginBottom: '1rem',
+                    color: 'white',
+                    letterSpacing: '-0.01em'
                   }}>
                     {room.name}
                   </h3>
-                  
+
                   <div style={{
-                    fontSize: '1.2rem',
-                    fontWeight: '600',
-                    color: '#3b82f6',
-                    marginBottom: '1rem'
+                    color: 'rgba(255,255,255,0.8)',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}>
-                    {new Intl.NumberFormat('vi-VN').format(room.price)}đ/đêm
+                    <span>👥</span>
+                    <span>{room.capacity.adult} người lớn, {room.capacity.child} trẻ em</span>
                   </div>
 
                   <p style={{
-                    color: '#666',
-                    marginBottom: '1.5rem',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    lineHeight: '1.5'
+                    color: 'rgba(255,255,255,0.8)',
+                    marginBottom: '2rem',
+                    lineHeight: '1.7',
+                    fontSize: '1rem'
                   }}>
                     {room.description}
                   </p>
 
+                  {/* Action buttons */}
                   <div style={{
                     display: 'flex',
-                    gap: '1rem',
-                    marginTop: '1.5rem'
+                    gap: '1rem'
                   }}>
                     <button style={{
                       flex: 1,
-                      padding: '0.8rem 1rem',
-                      backgroundColor: '#3b82f6',
+                      padding: '1rem',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '10px',
+                      borderRadius: '16px',
                       fontWeight: '600',
                       cursor: 'pointer',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      fontSize: '1rem',
+                      letterSpacing: '0.5px'
                     }}>
-                      Đặt Phòng
+                      Đặt phòng
                     </button>
+                    
                     <button 
                       onClick={() => {
                         setSelectedRoom(room);
                         setShowModal(true);
                       }}
                       style={{
-                        padding: '0.8rem 1.2rem',
-                        backgroundColor: '#f8fafc',
-                        color: '#3b82f6',
-                        border: '2px solid #3b82f6',
-                        borderRadius: '10px',
+                        padding: '1rem 1.5rem',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        color: 'white',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '16px',
                         fontWeight: '600',
                         cursor: 'pointer',
                         transition: 'all 0.3s ease',
-                        minWidth: '120px',
-                        textAlign: 'center'
+                        backdropFilter: 'blur(10px)',
+                        fontSize: '1rem'
                       }}
                     >
                       Chi tiết
@@ -398,16 +503,18 @@ const HotelRoomsListing = () => {
             <div style={{
               gridColumn: '1 / -1',
               textAlign: 'center',
-              color: 'white',
-              padding: '2rem'
+              color: 'rgba(255,255,255,0.8)',
+              padding: '4rem',
+              fontSize: '1.2rem'
             }}>
-              Không tìm thấy phòng nào phù hợp với tiêu chí tìm kiếm
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+              Không tìm thấy phòng phù hợp
             </div>
           )}
         </div>
       </div>
 
-      {/* Room Details Modal */}
+      {/* Modal */}
       {showModal && selectedRoom && (
         <div style={{
           position: 'fixed',
@@ -415,65 +522,58 @@ const HotelRoomsListing = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
           zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '2rem',
-          backdropFilter: 'blur(5px)'
+          backdropFilter: 'blur(10px)'
         }}>
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '20px',
-            maxWidth: '1000px',
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            borderRadius: '28px',
+            maxWidth: '900px',
             width: '95%',
             maxHeight: '90vh',
             overflow: 'auto',
             position: 'relative',
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
-            animation: 'modalFadeIn 0.3s ease'
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            animation: 'modalSlideIn 0.4s ease'
           }}>
-            {/* Close Button */}
             <button
               onClick={closeModal}
               style={{
                 position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                width: '40px',
-                height: '40px',
+                top: '1.5rem',
+                right: '1.5rem',
+                width: '50px',
+                height: '50px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
                 color: 'white',
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: '1.5rem',
-                zIndex: 1001,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                zIndex: 10,
                 transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
               }}
             >
               ×
             </button>
 
-            {/* Image Gallery */}
             <div style={{
               height: '400px',
-              backgroundImage: selectedRoom.images[0] ? 
+              backgroundImage: selectedRoom.images && selectedRoom.images.length > 0 ? 
                 `url(${selectedRoom.images[0]})` :
                 'url(https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              borderRadius: '20px 20px 0 0',
+              borderRadius: '28px 28px 0 0',
               position: 'relative'
             }}>
               <div style={{
@@ -481,69 +581,46 @@ const HotelRoomsListing = () => {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                padding: '2rem',
-                color: 'white'
-              }}>
-                <h2 style={{
-                  fontSize: '2.5rem',
-                  fontWeight: '600',
-                  marginBottom: '0.5rem'
-                }}>
-                  {selectedRoom.name}
-                </h2>
-                <div style={{
-                  display: 'flex',
-                  gap: '2rem',
-                  alignItems: 'center'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <span style={{ fontSize: '1.2rem' }}>👥</span>
-                    <span>{selectedRoom.capacity.adult} người lớn, {selectedRoom.capacity.child} trẻ em</span>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <span style={{ fontSize: '1.2rem' }}>💰</span>
-                    <span>{formatPrice(selectedRoom.price)}đ/đêm</span>
-                  </div>
-                </div>
-              </div>
+                height: '50%',
+                background: 'linear-gradient(transparent, rgba(15, 23, 42, 0.8))'
+              }} />
             </div>
 
-            {/* Modal Content */}
-            <div style={{ padding: '2rem' }}>
-              {/* Description */}
-              <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  color: '#333',
-                  marginBottom: '1rem'
-                }}>
-                  Mô tả
-                </h3>
-                <p style={{
-                  color: '#666',
-                  lineHeight: '1.8',
-                  fontSize: '1.1rem'
-                }}>
-                  {selectedRoom.description}
-                </p>
+            <div style={{ padding: '3rem' }}>
+              <h2 style={{
+                fontSize: '2.5rem',
+                fontWeight: '600',
+                marginBottom: '1rem',
+                color: 'white',
+                letterSpacing: '-0.02em'
+              }}>
+                {selectedRoom.name}
+              </h2>
+
+              <div style={{
+                fontSize: '1.8rem',
+                fontWeight: '600',
+                color: '#60a5fa',
+                marginBottom: '2rem'
+              }}>
+                {formatPrice(selectedRoom.price)}đ/đêm
               </div>
+
+              <p style={{
+                color: 'rgba(255,255,255,0.9)',
+                lineHeight: '1.8',
+                marginBottom: '3rem',
+                fontSize: '1.1rem'
+              }}>
+                {selectedRoom.description}
+              </p>
 
               {/* Amenities */}
               <div style={{ marginBottom: '2rem' }}>
                 <h3 style={{
                   fontSize: '1.5rem',
                   fontWeight: '600',
-                  color: '#333',
+                  color: 'white',
                   marginBottom: '1rem'
                 }}>
                   Tiện ích đi kèm
@@ -561,12 +638,12 @@ const HotelRoomsListing = () => {
                         alignItems: 'center',
                         gap: '0.75rem',
                         padding: '1rem',
-                        backgroundColor: '#f8fafc',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
                         borderRadius: '10px',
-                        color: '#333'
+                        color: 'white'
                       }}
                     >
-                      <span style={{ color: '#3b82f6', fontSize: '1.2rem' }}>✓</span>
+                      <span style={{ color: '#60a5fa', fontSize: '1.2rem' }}>✓</span>
                       <span style={{ fontSize: '1rem' }}>{amenity}</span>
                     </div>
                   ))}
@@ -579,7 +656,7 @@ const HotelRoomsListing = () => {
                   <h3 style={{
                     fontSize: '1.5rem',
                     fontWeight: '600',
-                    color: '#333',
+                    color: 'white',
                     marginBottom: '1rem'
                   }}>
                     Tiện nghi phòng
@@ -597,17 +674,19 @@ const HotelRoomsListing = () => {
                           alignItems: 'center',
                           gap: '0.75rem',
                           padding: '1rem',
-                          backgroundColor: '#f8fafc',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
                           borderRadius: '10px',
-                          color: '#333'
+                          color: 'white'
                         }}
                       >
-                        <span style={{ color: '#3b82f6', fontSize: '1.2rem' }}>
+                        <span style={{ color: '#60a5fa', fontSize: '1.2rem' }}>
                           {facility.icon === 'air-conditioner' ? '❄️' : '✓'}
                         </span>
                         <div>
                           <div style={{ fontWeight: '500' }}>{facility.name}</div>
-                          <div style={{ fontSize: '0.875rem', color: '#666' }}>{facility.description}</div>
+                          <div style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)' }}>
+                            {facility.description}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -620,41 +699,36 @@ const HotelRoomsListing = () => {
                 display: 'flex',
                 gap: '1.5rem',
                 marginTop: '2rem',
-                borderTop: '1px solid #e5e7eb',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
                 paddingTop: '2rem'
               }}>
                 <button style={{
                   flex: 1,
-                  padding: '1rem',
-                  backgroundColor: '#3b82f6',
+                  padding: '1.2rem',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '12px',
+                  borderRadius: '16px',
                   fontWeight: '600',
                   fontSize: '1.1rem',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem'
+                  transition: 'all 0.3s ease'
                 }}>
-                  <span>🏨</span>
                   Đặt phòng ngay
                 </button>
                 <button 
                   onClick={closeModal}
                   style={{
-                    padding: '1rem 2rem',
-                    backgroundColor: '#f1f5f9',
-                    color: '#64748b',
-                    border: 'none',
-                    borderRadius: '12px',
+                    padding: '1.2rem 2rem',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '16px',
                     fontWeight: '600',
                     fontSize: '1.1rem',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
-                    minWidth: '150px'
+                    backdropFilter: 'blur(10px)'
                   }}
                 >
                   Đóng
@@ -664,24 +738,15 @@ const HotelRoomsListing = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes modalSlideIn {
+          from { transform: translateY(30px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };
 
 export default HotelRoomsListing;
-
-// Add keyframe animation for modal
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes modalFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-`;
-document.head.appendChild(style);
