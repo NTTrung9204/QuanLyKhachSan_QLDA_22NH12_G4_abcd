@@ -33,6 +33,11 @@ const AdminNavigation = () => {
       icon: '🖼️',
       path: '/admin/images',
     },
+    {
+      text: 'Thống kê',
+      icon: '📊',
+      path: '/admin/statistics',
+    },
   ];
 
   const handleLogout = async () => {

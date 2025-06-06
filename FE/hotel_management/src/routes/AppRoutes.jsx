@@ -20,6 +20,7 @@ import CheckOutManagePage from '../pages/staff/CheckOutManagePage';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
 import BookingServicePage from '../pages/staff/BookingServicePage';
 import StaffBookingListPage from '../pages/staff/StaffBookingListPage';
+import StatisticsDashboard from '../pages/admin/StatisticsDashboard';
 
 const AppRoutes = () => {
     return (
@@ -51,6 +52,7 @@ const AppRoutes = () => {
                                 <Route path="images" element={<ImageManagePage />} />
                                 <Route path="facilities" element={<FacilityManagePage />} />
                                 <Route path="type-rooms" element={<RoomTypeManagePage />} />
+                                <Route path="statistics" element={<StatisticsDashboard />} />
                             </Routes>
                         </AdminLayout>
                     </PrivateRoute>
