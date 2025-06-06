@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import BookingForm from '../../components/BookingForm';
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -12,6 +13,7 @@ const HotelRoomsListing = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showBookingForm, setShowBookingForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -459,19 +461,24 @@ const HotelRoomsListing = () => {
                     display: 'flex',
                     gap: '1rem'
                   }}>
-                    <button style={{
-                      flex: 1,
-                      padding: '1rem',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '16px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      fontSize: '1rem',
-                      letterSpacing: '0.5px'
-                    }}>
+                    <button 
+                      onClick={() => {
+                        setSelectedRoom(room);
+                        setShowBookingForm(true);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '1rem',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '16px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        fontSize: '1rem',
+                        letterSpacing: '0.5px'
+                      }}>
                       Đặt phòng
                     </button>
                     
@@ -516,20 +523,27 @@ const HotelRoomsListing = () => {
 
       {/* Modal */}
       {showModal && selectedRoom && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '2rem',
-          backdropFilter: 'blur(10px)'
-        }}>
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2rem',
+            backdropFilter: 'blur(10px)'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeModal();
+            }
+          }}
+        >
           <div style={{
             backgroundColor: 'rgba(15, 23, 42, 0.95)',
             borderRadius: '28px',
@@ -702,20 +716,6 @@ const HotelRoomsListing = () => {
                 borderTop: '1px solid rgba(255,255,255,0.1)',
                 paddingTop: '2rem'
               }}>
-                <button style={{
-                  flex: 1,
-                  padding: '1.2rem',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '16px',
-                  fontWeight: '600',
-                  fontSize: '1.1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}>
-                  Đặt phòng ngay
-                </button>
                 <button 
                   onClick={closeModal}
                   style={{
@@ -735,6 +735,67 @@ const HotelRoomsListing = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Form Modal */}
+      {showBookingForm && selectedRoom && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2rem',
+            backdropFilter: 'blur(10px)'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowBookingForm(false);
+            }
+          }}
+        >
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '28px',
+            maxWidth: '1200px',
+            width: '95%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            position: 'relative',
+            animation: 'modalSlideIn 0.4s ease'
+          }}>
+            <button
+              onClick={() => setShowBookingForm(false)}
+              style={{
+                position: 'absolute',
+                top: '1.5rem',
+                right: '1.5rem',
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                color: '#333',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+                transition: 'all 0.3s ease'
+              }}
+            >
+              ×
+            </button>
+            <BookingForm selectedRoom={selectedRoom} onClose={() => setShowBookingForm(false)} />
           </div>
         </div>
       )}

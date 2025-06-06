@@ -392,6 +392,38 @@ const HotelServiceListing = () => {
             justifyContent: 'center',
             flexWrap: 'wrap'
           }}>
+            <button
+              onClick={() => handleFilterChange('')}
+              style={{
+                padding: '1rem 2rem',
+                borderRadius: '30px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                backgroundColor: selectedFilter === '' 
+                  ? 'rgba(255,255,255,0.2)' 
+                  : 'rgba(255,255,255,0.08)',
+                color: 'white',
+                fontWeight: selectedFilter === '' ? '600' : '400',
+                cursor: 'pointer',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                backdropFilter: 'blur(20px)',
+                transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+                opacity: isVisible ? 1 : 0,
+                fontSize: '0.95rem',
+                letterSpacing: '0.5px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.15)';
+                e.target.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = selectedFilter === '' 
+                  ? 'rgba(255,255,255,0.2)' 
+                  : 'rgba(255,255,255,0.08)';
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              Xem tất cả
+            </button>
             {filterOptions.map((option, index) => (
               <button
                 key={option.key}
@@ -410,7 +442,7 @@ const HotelServiceListing = () => {
                   backdropFilter: 'blur(20px)',
                   transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
                   opacity: isVisible ? 1 : 0,
-                  animationDelay: `${index * 0.1}s`,
+                  animationDelay: `${(index + 1) * 0.1}s`,
                   fontSize: '0.95rem',
                   letterSpacing: '0.5px'
                 }}
@@ -425,7 +457,7 @@ const HotelServiceListing = () => {
                   e.target.style.transform = 'translateY(0)';
                 }}
               >
-                {option.label} ({option.count})
+                {option.label}
               </button>
             ))}
           </div>
@@ -515,57 +547,25 @@ const HotelServiceListing = () => {
                     <h3 style={{
                       fontSize: '1.8rem',
                       fontWeight: '600',
-                      marginBottom: '1rem',
+                      marginBottom: '2rem',
                       color: 'white',
                       letterSpacing: '-0.01em'
                     }}>
                       {service.name}
                     </h3>
 
-                    <p style={{
-                      color: 'rgba(255,255,255,0.8)',
-                      marginBottom: '2rem',
-                      lineHeight: '1.7',
-                      fontSize: '1rem'
-                    }}>
-                      {service.description}
-                    </p>
-
                     {/* Action buttons */}
                     <div style={{
                       display: 'flex',
                       gap: '1rem'
                     }}>
-                      <button style={{
-                        flex: 1,
-                        padding: '1rem',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '16px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        fontSize: '1rem',
-                        letterSpacing: '0.5px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.transform = 'translateY(-2px)';
-                        e.target.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.4)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = 'none';
-                      }}>
-                        Đặt ngay
-                      </button>
-                      
                       <button 
                         onClick={() => {
                           setSelectedService(service);
                           setShowModal(true);
                         }}
                         style={{
+                          width: '100%',
                           padding: '1rem 1.5rem',
                           backgroundColor: 'rgba(255,255,255,0.1)',
                           color: 'white',
@@ -719,28 +719,7 @@ const HotelServiceListing = () => {
                 borderTop: '1px solid rgba(255,255,255,0.1)',
                 paddingTop: '2rem'
               }}>
-                <button style={{
-                  flex: 1,
-                  padding: '1.2rem',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '16px',
-                  fontWeight: '600',
-                  fontSize: '1.1rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }}>
-                  Đặt dịch vụ ngay
-                </button>
+       
                 <button 
                   onClick={closeModal}
                   style={{
