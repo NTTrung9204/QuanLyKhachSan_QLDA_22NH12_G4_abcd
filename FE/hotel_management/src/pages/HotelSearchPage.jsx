@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import HotelToolbar from '../components/HotelToolbar';
 import HotelIntroSection from '../components/HotelIntroSection';
+import { useNavigate } from 'react-router-dom';
 
 // Cập nhật API endpoint với port 3000
 const API_BASE_URL = 'http://localhost:3000/api';
 const IMAGE_URL = 'http://localhost:3000/api/images';
 
 const HotelSearchPage = () => {
+  const navigate = useNavigate();
   const [searchData, setSearchData] = useState({
     checkIn: '',
     checkOut: '',
@@ -478,7 +480,12 @@ const HotelSearchPage = () => {
                                 currency: 'VND'
                               }).format(service.price)}
                             </p>
-                            <button style={styles.serviceButton}>Đặt ngay</button>
+                            <button 
+                              onClick={() => navigate('/services')}
+                              style={styles.serviceButton}
+                            >
+                              Đặt ngay
+                            </button>
                           </div>
                         </div>
                       </div>
