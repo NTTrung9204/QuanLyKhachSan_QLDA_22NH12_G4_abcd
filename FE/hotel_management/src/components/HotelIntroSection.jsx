@@ -90,8 +90,8 @@ const HotelIntroSection = () => {
                 marginBottom: '2rem'
               }}>
                 <span style={{color: 'white', fontSize: '2rem'}}>⚓</span>
-              </div>
-              
+      </div>
+
               <div style={{color: 'white'}}>
                 <div style={{
                   fontSize: '0.875rem',
@@ -118,9 +118,9 @@ const HotelIntroSection = () => {
                   HOTEL
                 </div>
               </div>
+              </div>
             </div>
-          </div>
-
+            
           {/* Right Content - Description */}
           <div style={{
             transform: isVisible ? 'translateX(0)' : 'translateX(60px)',
@@ -139,7 +139,7 @@ const HotelIntroSection = () => {
                 Một khách sạn hiện đại từ những năm 2020. 
                 Một truyền thống gia đình được chuyển đổi 
                 thành một khách sạn boutique tuyệt đẹp
-              </h1>
+            </h1>
 
               <p style={{
                 fontSize: '1.125rem',
@@ -181,7 +181,7 @@ const HotelIntroSection = () => {
                   <p style={{color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem'}}>
                     Ngay tại bãi biển Mỹ Khê, trung tâm thành phố
                   </p>
-                </div>
+            </div>
                 <div>
                   <h3 style={{
                     color: 'white',
@@ -192,12 +192,15 @@ const HotelIntroSection = () => {
                   <p style={{color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem'}}>
                     Trải nghiệm đẳng cấp với dịch vụ chuyên nghiệp
                   </p>
-                </div>
-              </div>
+          </div>
+        </div>
 
               <div style={{
                 display: 'flex',
-                gap: '1rem'
+                gap: '1rem',
+                justifyContent: 'center',
+                width: '100%',
+                marginTop: '2rem'
               }}>
                 <button style={{
                   backgroundColor: '#3b82f6',
@@ -207,7 +210,9 @@ const HotelIntroSection = () => {
                   fontWeight: 500,
                   transition: 'all 0.3s ease',
                   border: 'none',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontSize: '1.1rem',
+                  minWidth: '200px'
                 }}>
                   Đặt Phòng Ngay →
                 </button>
