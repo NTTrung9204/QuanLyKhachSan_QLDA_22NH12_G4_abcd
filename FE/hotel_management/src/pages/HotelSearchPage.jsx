@@ -483,7 +483,7 @@ const HotelSearchPage = () => {
                               onClick={() => navigate('/services')}
                               style={styles.serviceButton}
                             >
-                              Đặt ngay
+                              Xem chi tiết
                             </button>
                           </div>
                         </div>

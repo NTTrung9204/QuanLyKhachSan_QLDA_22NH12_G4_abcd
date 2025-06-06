@@ -56,6 +56,11 @@ const HotelToolbar = () => {
     navigate('/customer/profile');
   };
 
+  const handleViewBookingHistory = () => {
+    setShowProfileMenu(false);
+    navigate('/customer/booking-history');
+  };
+
   const toggleProfileMenu = () => {
     setShowProfileMenu(!showProfileMenu);
   };
@@ -148,16 +153,11 @@ const HotelToolbar = () => {
                     Thông tin cá nhân
                   </button>
                   
-                  <button style={styles.menuItem}>
+                  <button style={styles.menuItem} onClick={handleViewBookingHistory}>
                     <span style={styles.menuIcon}>📋</span>
                     Lịch sử đặt phòng
                   </button>
-                  
-                  <button style={styles.menuItem}>
-                    <span style={styles.menuIcon}>⚙️</span>
-                    Cài đặt
-                  </button>
-                  
+   
                   <div style={styles.menuDivider}></div>
                   
                   <button style={styles.logoutMenuItem} onClick={handleLogout}>
