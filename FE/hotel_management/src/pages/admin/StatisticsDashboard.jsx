@@ -372,7 +372,7 @@ const StatisticsDashboard = () => {
             )}
 
             {/* Charts */}
-            <div className="charts-container">
+            <div className="charts-container" style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
                 {/* Daily Revenue Chart */}
                 <div className="chart-card">
                     <h2 className="chart-title">Doanh thu theo ngày trong tháng</h2>
@@ -409,7 +409,7 @@ const StatisticsDashboard = () => {
                 </div>
 
                 {/* Bookings by Room Type Chart */}
-                <div className="chart-card">
+                {/* <div className="chart-card">
                     <h2 className="chart-title">Số lượng đặt theo loại phòng</h2>
                     <div className="chart-container">
                         {bookingsByRoomType && bookingsByRoomType.length > 0 ? (
@@ -477,7 +477,7 @@ const StatisticsDashboard = () => {
                             </div>
                         )}
                     </div>
-                </div>
+                </div> */}
 
                 {/* Bookings by Date Chart */}
                 <div className="chart-card">

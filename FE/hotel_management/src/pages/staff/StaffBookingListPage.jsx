@@ -138,7 +138,7 @@ const StaffBookingListPage = () => {
     return (
         <div style={styles.container}>
             <h1 style={styles.title}>Quản lý dịch vụ đặt phòng</h1>
-
+{/* 
             <div style={styles.filterContainer}>
                 <form onSubmit={handleSearch} style={styles.filterForm}>
                     <div style={styles.filterGroup}>
@@ -196,7 +196,7 @@ const StaffBookingListPage = () => {
                         Tìm kiếm
                     </button>
                 </form>
-            </div>
+            </div> */}
 
             {loading ? (
                 <div style={styles.loading}>Đang tải...</div>

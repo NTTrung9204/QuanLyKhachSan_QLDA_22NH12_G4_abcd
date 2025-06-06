@@ -308,7 +308,7 @@ const RegisterPage = () => {
               ) : 'Đăng ký miễn phí'}
             </button>
 
-            <div style={styles.divider}>
+            {/* <div style={styles.divider}>
               <span style={styles.dividerText}>hoặc</span>
             </div>
 
@@ -319,16 +319,16 @@ const RegisterPage = () => {
             >
               <span style={styles.googleIcon}>G</span>
               Tiếp tục với Google
-            </button>
+            </button> */}
 
-            <button 
+            {/* <button 
               type="button"
               style={{...styles.socialButton, ...styles.facebookButton}}
               onClick={handleFacebookSignup}
             >
               <span style={styles.facebookIcon}>f</span>
               Tiếp tục với Facebook
-            </button>
+            </button> */}
 
             <div style={styles.loginPrompt}>
               <p>Đã có tài khoản? <a href="/login" style={styles.loginLink}>Đăng nhập</a></p>

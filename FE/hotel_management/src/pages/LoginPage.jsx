@@ -34,8 +34,11 @@ const LoginPage = () => {
       const response = await api.post('/api/auth/login', formData);
       const userData = response.data;
 
+      console.log(userData)
+      console.log(userData.data)
+
       // Lưu token và thông tin user vào localStorage
-      localStorage.setItem('token', userData.token);
+      localStorage.setItem('token', userData.data.token);
       localStorage.setItem('user', JSON.stringify(userData.data.user));
       
       login(userData);
@@ -44,6 +47,7 @@ const LoginPage = () => {
       // Chuyển hướng dựa theo role
       setTimeout(() => {
         const userRole = userData.data.user.role;
+        console.log("userRole:", userRole)
         switch(userRole) {
           case 'admin':
             navigate('/admin');
@@ -153,18 +157,18 @@ const LoginPage = () => {
               ) : 'Đăng nhập'}
             </button>
 
-            <div style={styles.divider}>
+            {/* <div style={styles.divider}>
               <span style={styles.dividerText}>hoặc</span>
-            </div>
+            </div> */}
 
-            <button 
+            {/* <button 
               type="button"
               style={styles.socialButton}
               onClick={handleGoogleLogin}
             >
               <span style={styles.googleIcon}>G</span>
               Tiếp tục với Google
-            </button>
+            </button> */}
 
             <div style={styles.registerPrompt}>
               <p>Chưa có tài khoản? <Link to="/register" style={styles.registerLink}>Đăng ký ngay</Link></p>

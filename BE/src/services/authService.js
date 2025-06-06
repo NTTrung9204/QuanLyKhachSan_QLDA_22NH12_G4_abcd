@@ -75,4 +75,137 @@ exports.loginUser = async (username, password) => {
   user.passwordHash = undefined;
 
   return { user, token };
+};
+
+/**
+ * Get all staff members
+ * @returns {Array} List of staff members
+ */
+exports.getAllStaff = async () => {
+  const staffMembers = await User.find({ role: 'staff' }).select('-passwordHash');
+  return staffMembers;
+};
+
+/**
+ * Get staff member by ID
+ * @param {string} id - Staff member ID
+ * @returns {Object} Staff member details
+ */
+exports.getStaffById = async (id) => {
+  const staff = await User.findOne({ _id: id, role: 'staff' }).select('-passwordHash');
+  if (!staff) {
+    throw new AppError('Staff member not found', 404);
+  }
+  return staff;
+};
+
+/**
+ * Create a new staff member
+ * @param {Object} staffData - Staff member data
+ * @returns {Object} Created staff member
+ */
+exports.createStaff = async (staffData) => {
+  const { username, password, fullName, email, phone, address, cccd, birthDate, gender } = staffData;
+
+  // Check if username already exists
+  const existingUser = await User.findOne({ username });
+  if (existingUser) {
+    throw new AppError('Username already in use', 400);
+  }
+
+  // Check if email already exists
+  const existingEmail = await User.findOne({ 'profile.email': email });
+  if (existingEmail) {
+    throw new AppError('Email already in use', 400);
+  }
+
+  // Create new staff member
+  const newStaff = await User.create({
+    username,
+    passwordHash: password,
+    role: 'staff',
+    profile: {
+      fullName,
+      email,
+      phone,
+      address,
+      cccd,
+      birthDate,
+      gender,
+      state: 'active'
+    }
+  });
+
+  // Remove passwordHash from output
+  newStaff.passwordHash = undefined;
+
+  return newStaff;
+};
+
+/**
+ * Update staff member details
+ * @param {string} id - Staff member ID
+ * @param {Object} updateData - Data to update
+ * @returns {Object} Updated staff member
+ */
+exports.updateStaff = async (id, updateData) => {
+  const staff = await User.findOne({ _id: id, role: 'staff' });
+  
+  if (!staff) {
+    throw new AppError('Staff member not found', 404);
+  }
+
+  // Check if updating email and it already exists
+  if (updateData.email && updateData.email !== staff.profile.email) {
+    const existingEmail = await User.findOne({ 'profile.email': updateData.email });
+    if (existingEmail) {
+      throw new AppError('Email already in use', 400);
+    }
+  }
+
+  // Update profile fields
+  const allowedUpdates = ['fullName', 'email', 'phone', 'address', 'cccd', 'birthDate', 'gender', 'state'];
+  Object.keys(updateData).forEach(key => {
+    if (allowedUpdates.includes(key)) {
+      staff.profile[key] = updateData[key];
+    }
+  });
+
+  // Update password if provided
+  if (updateData.password) {
+    staff.passwordHash = updateData.password;
+  }
+
+  await staff.save();
+
+  // Remove passwordHash from output
+  staff.passwordHash = undefined;
+
+  return staff;
+};
+
+/**
+ * Delete a staff member
+ * @param {string} id - Staff member ID
+ * @returns {Object} Deleted staff member
+ */
+exports.deleteStaff = async (id) => {
+  const staff = await User.findOne({ _id: id, role: 'staff' });
+  
+  if (!staff) {
+    throw new AppError('Staff member not found', 404);
+  }
+
+  // Instead of hard deleting, we set the state to 'blocked'
+  staff.profile.state = 'blocked';
+  await staff.save();
+
+  return {
+    message: 'Staff member has been deactivated successfully',
+    staff: {
+      _id: staff._id,
+      username: staff.username,
+      profile: staff.profile
+    }
+  };
 }; 
