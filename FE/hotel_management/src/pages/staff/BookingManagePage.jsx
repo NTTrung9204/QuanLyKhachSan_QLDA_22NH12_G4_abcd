@@ -359,21 +359,40 @@ const styles = {
 export default function BookingManagePage() {
     const getDefaultDateTime = () => {
         const date = new Date();
+        // Thêm 1 giờ vào thời gian hiện tại
+        date.setHours(date.getHours() + 1);
         // Làm tròn đến 30 phút gần nhất
         const minutes = Math.ceil(date.getMinutes() / 30) * 30;
         date.setMinutes(minutes, 0, 0);
-        return date.toISOString().slice(0, 16); // Lấy đến phút (YYYY-MM-DDTHH:mm)
+        
+        // Chuyển đổi sang định dạng YYYY-MM-DDTHH:mm có tính đến timezone
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const mins = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${mins}`;
     };
 
     const getDefaultCheckOutTime = (checkInTime) => {
         const date = new Date(checkInTime);
-        // Thêm 1 ngày
+        // Thêm 1 ngày vào thời gian check-in
         date.setDate(date.getDate() + 1);
-        return date.toISOString().slice(0, 16);
+        
+        // Sử dụng cùng format với getDefaultDateTime
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const mins = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${mins}`;
     };
 
     const formatDateTimeForAPI = (dateTimeString) => {
-        return new Date(dateTimeString).toISOString();
+        const date = new Date(dateTimeString);
+        return date.toISOString();
     };
     
     const [checkIn, setCheckIn] = useState(getDefaultDateTime());
