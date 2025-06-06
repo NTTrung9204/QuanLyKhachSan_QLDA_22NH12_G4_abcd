@@ -34,8 +34,11 @@ const LoginPage = () => {
       const response = await api.post('/api/auth/login', formData);
       const userData = response.data;
 
+      console.log(userData)
+      console.log(userData.data)
+
       // Lưu token và thông tin user vào localStorage
-      localStorage.setItem('token', userData.token);
+      localStorage.setItem('token', userData.data.token);
       localStorage.setItem('user', JSON.stringify(userData.data.user));
       
       login(userData);
@@ -44,6 +47,7 @@ const LoginPage = () => {
       // Chuyển hướng dựa theo role
       setTimeout(() => {
         const userRole = userData.data.user.role;
+        console.log("userRole:", userRole)
         switch(userRole) {
           case 'admin':
             navigate('/admin');
