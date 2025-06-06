@@ -182,4 +182,30 @@ exports.updateStaff = async (id, updateData) => {
   staff.passwordHash = undefined;
 
   return staff;
+};
+
+/**
+ * Delete a staff member
+ * @param {string} id - Staff member ID
+ * @returns {Object} Deleted staff member
+ */
+exports.deleteStaff = async (id) => {
+  const staff = await User.findOne({ _id: id, role: 'staff' });
+  
+  if (!staff) {
+    throw new AppError('Staff member not found', 404);
+  }
+
+  // Instead of hard deleting, we set the state to 'blocked'
+  staff.profile.state = 'blocked';
+  await staff.save();
+
+  return {
+    message: 'Staff member has been deactivated successfully',
+    staff: {
+      _id: staff._id,
+      username: staff.username,
+      profile: staff.profile
+    }
+  };
 }; 

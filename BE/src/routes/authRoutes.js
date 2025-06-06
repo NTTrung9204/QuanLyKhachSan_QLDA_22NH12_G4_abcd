@@ -17,5 +17,6 @@ router.get('/staff', authController.getAllStaff);
 router.post('/staff', authController.createStaff);
 router.patch('/staff/:id', authController.updateStaff);
 router.get('/staff/:id', authController.getStaffById);
+router.delete('/staff/:id', authController.deleteStaff);
 
 module.exports = router;
