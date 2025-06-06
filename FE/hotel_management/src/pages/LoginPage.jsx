@@ -52,7 +52,7 @@ const LoginPage = () => {
             navigate('/staff/bookings');
             break;
           case 'customer':
-            navigate('/customer');
+            navigate('/');
             break;
           default:
             navigate('/');
