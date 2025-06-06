@@ -14,7 +14,8 @@ import BookingManagePage from '../pages/staff/BookingManagePage';
 import ProfileViewPage from '../pages/customer/ProfileViewPage';
 import ServiceManagePage from '../pages/admin/ServiceManagePage';
 import HotelSearchPage from '../pages/HotelSearchPage';
-import HotelRoomsListing from '../pages/customer/HotelRoomsListing'; 
+import HotelRoomsListing from '../pages/customer/HotelRoomsListing';
+import HotelServiceListing from '../pages/customer/HotelServiceListing';
 import CheckInManagePage from '../pages/staff/CheckInManagePage';
 import StaffLayout from '../layouts/StaffLayout';
 import AdminLayout from '../layouts/AdminLayout';
@@ -36,7 +37,7 @@ const AppRoutes = () => {
                 path="/" 
                 element={
                     <PrivateRoute>
-                        <HomePage />
+                        <HotelSearchPage />
                     </PrivateRoute>
                 } 
             />
@@ -49,6 +50,15 @@ const AppRoutes = () => {
                     </PrivateRoute>
                 } 
             />  
+
+            <Route 
+                path="/services" 
+                element={
+                    <PrivateRoute>
+                        <HotelServiceListing />
+                    </PrivateRoute>
+                } 
+            />
 
             {/* Admin Routes */}
             <Route
