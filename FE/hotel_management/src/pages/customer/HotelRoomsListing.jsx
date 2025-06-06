@@ -16,25 +16,46 @@ const HotelRoomsListing = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rooms, setRooms] = useState([]);
+  const [imageMap, setImageMap] = useState({});
 
   useEffect(() => {
     setIsVisible(true);
     fetchRoomTypes();
   }, []);
 
+  const fetchImages = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/images`);
+      const images = response.data.data;
+      const map = {};
+      images.forEach(img => {
+        map[img._id] = img.path;
+      });
+      setImageMap(map);
+      return map;
+    } catch (err) {
+      console.error('Error fetching images:', err);
+      return {};
+    }
+  };
+
   const fetchRoomTypes = async () => {
     try {
       setLoading(true);
       setError(null);
       console.log('Fetching room types...');
-      const response = await axios.get(`${API_BASE_URL}/api/room-types`);
-      console.log('Raw API response:', response.data);
+      const [roomResponse, imageMap] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/room-types`),
+        fetchImages()
+      ]);
       
-      if (!response.data.data || !Array.isArray(response.data.data)) {
+      console.log('Raw API response:', roomResponse.data);
+      
+      if (!roomResponse.data.data || !Array.isArray(roomResponse.data.data)) {
         throw new Error('Invalid data format from API');
       }
 
-      const roomsData = response.data.data.map(type => ({
+      const roomsData = roomResponse.data.data.map(type => ({
         id: type._id,
         name: type.name,
         type: type.name.toLowerCase().replace(' ', '_'),
@@ -46,8 +67,8 @@ const HotelRoomsListing = () => {
         description: type.description,
         amenities: type.amenities || [],
         facilities: type.facilityIds || [],
-        images: type.imageIds || [],
-        roomsLeft: 5
+        images: type.imageIds ? type.imageIds.map(id => imageMap[id] || '') : [],
+        roomCount: type.roomCount || 0
       }));
 
       console.log('Processed rooms data:', roomsData);
@@ -61,12 +82,15 @@ const HotelRoomsListing = () => {
   };
 
   const filterOptions = [
-    { key: 'all', label: 'Tất Cả Phòng', count: rooms.length },
-    ...Array.from(new Set(rooms.map(room => room.type))).map(type => ({
-      key: type,
-      label: rooms.find(r => r.type === type)?.name || type,
-      count: rooms.filter(r => r.type === type).length
-    }))
+    { key: 'all', label: 'Tất Cả Phòng', count: rooms.reduce((sum, room) => sum + (room.roomCount || 1), 0) },
+    ...Array.from(new Set(rooms.map(room => room.type))).map(type => {
+      const roomsOfType = rooms.filter(r => r.type === type);
+      return {
+        key: type,
+        label: roomsOfType[0]?.name || type,
+        count: roomsOfType.reduce((sum, room) => sum + (room.roomCount || 1), 0)
+      };
+    })
   ];
 
   console.log('Current filter options:', filterOptions);
@@ -177,7 +201,7 @@ const HotelRoomsListing = () => {
             maxWidth: '600px',
             margin: '0 auto'
           }}>
-            Khám phá các loại phòng cao cấp tại Khách Sạn Biển Xanh
+            Khám phá các loại phòng cao cấp tại Khách Sạn ABCD
           </p>
         </div>
 
@@ -277,7 +301,7 @@ const HotelRoomsListing = () => {
                   height: '250px',
                   backgroundColor: '#f5f5f5',
                   backgroundImage: room.images && room.images.length > 0 ? 
-                    `url(${API_BASE_URL}/api/images/${room.images[0]})` :
+                    `url(${room.images[0]})` :
                     'url(https://plus.unsplash.com/premium_photo-1678297269904-6c46528b36a1?q=80&w=1470&auto=format&fit=crop)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
@@ -445,7 +469,7 @@ const HotelRoomsListing = () => {
             <div style={{
               height: '400px',
               backgroundImage: selectedRoom.images[0] ? 
-                `url(${API_BASE_URL}/api/images/${selectedRoom.images[0]})` :
+                `url(${selectedRoom.images[0]})` :
                 'url(https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
