@@ -34,6 +34,11 @@ const AdminNavigation = () => {
       path: '/admin/images',
     },
     {
+      text: 'Quản lý nhân viên',
+      icon: '👨‍💻',
+      path: '/admin/staff',
+    },
+    {
       text: 'Thống kê',
       icon: '📊',
       path: '/admin/statistics',

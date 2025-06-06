@@ -25,6 +25,7 @@ import BookingServicePage from '../pages/staff/BookingServicePage';
 import StaffBookingListPage from '../pages/staff/StaffBookingListPage';
 import StatisticsDashboard from '../pages/admin/StatisticsDashboard';
 import CustomerLayout from '../layouts/CustomerLayout';
+import StaffManagement from '../pages/admin/StaffManagement';
 
 const AppRoutes = () => {
     return (
@@ -74,6 +75,7 @@ const AppRoutes = () => {
                                 <Route path="facilities" element={<FacilityManagePage />} />
                                 <Route path="type-rooms" element={<RoomTypeManagePage />} />
                                 <Route path="statistics" element={<StatisticsDashboard />} />
+                                <Route path="staff" element={<StaffManagement />} />
                             </Routes>
                         </AdminLayout>
                     </PrivateRoute>
