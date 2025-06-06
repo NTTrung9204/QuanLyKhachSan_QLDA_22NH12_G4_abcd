@@ -274,7 +274,7 @@ const ServiceManagePage = () => {
           padding: 24px;
           max-width: 1200px;
           margin: 0 auto;
-          margin-top: 20px; /* Reduced from 200px to 20px */
+          margin-top: 400px; /* Reduced from 200px to 20px */
           margin-bottom: auto;
           background-color: #f5f6fa;
           border-radius: 12px;
