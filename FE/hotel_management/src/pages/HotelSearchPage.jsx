@@ -215,7 +215,6 @@ const HotelSearchPage = () => {
 
   return (
     <div style={styles.container}>
-      <HotelToolbar />
       
       {/* Loading Indicator */}
       {loading && (
